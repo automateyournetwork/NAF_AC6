@@ -1,0 +1,14 @@
+{
+  "id": "trial",
+  "name": "Trial region",
+  "lon0": 0,
+  "lat0": 0,
+  "sites": [
+    { "code": "ALF", "name": "Alfa", "lon": -6, "lat": 2, "weight": 1 },
+    { "code": "BRV", "name": "Bravo", "lon": -2, "lat": 4, "weight": 2 },
+    { "code": "CHA", "name": "Charlie", "lon": 3, "lat": 3, "weight": 1 },
+    { "code": "DLT", "name": "Delta", "lon": 5, "lat": -2, "weight": 3 },
+    { "code": "ECH", "name": "Echo", "lon": 0, "lat": -4, "weight": 1 },
+    { "code": "FOX", "name": "Foxtrot", "lon": -5, "lat": -3, "weight": 2 }
+  ]
+}

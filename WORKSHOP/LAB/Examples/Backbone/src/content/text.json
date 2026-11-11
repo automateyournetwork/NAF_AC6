@@ -1,0 +1,137 @@
+{
+  "briefing": "Traffic takes the lowest total cost. You shape the network; you never steer packets.",
+  "pitch": "Build and operate a backbone. Predict where the congestion goes before it gets there.",
+  "faithful": [
+    {
+      "id": "F1",
+      "text": "Each site is a router. It works out the lowest-cost path to every other site. A path's cost is the sum of the costs of its links, and the lower sum wins.",
+      "source": "RFC 2328 §16.1"
+    },
+    {
+      "id": "F2",
+      "text": "A link cost is a whole number from 1 to 65535. Zero is not allowed.",
+      "source": "RFC 2328 §C.3 and §A.4.2"
+    },
+    {
+      "id": "F3",
+      "text": "When two or more paths to a destination cost the same, the router records every tied next hop.",
+      "source": "RFC 2328 §16.1 and §16.8"
+    },
+    {
+      "id": "F4",
+      "text": "A router may keep fewer than all of its equal-cost routes. In this version each router keeps one.",
+      "source": "RFC 2328 §16.8"
+    },
+    {
+      "id": "F5",
+      "text": "Forwarding is hop by hop. Every router on the way uses its own table, so traffic is divided at each router among that router's next hops, not evenly across whole paths.",
+      "source": "RFC 2328 §16.1 and §16.1.1"
+    },
+    {
+      "id": "F6",
+      "text": "A link is used only if both of its ends report it. A cut removes it in both directions.",
+      "source": "RFC 2328 §16.1"
+    },
+    {
+      "id": "F7",
+      "text": "When a link goes down or a cost changes, every router recomputes its table and traffic follows the new tables.",
+      "source": "RFC 2328 §9.2 and §13.2"
+    },
+    {
+      "id": "F8",
+      "text": "Cost is configuration. It does not react to load. A congested lowest-cost path stays the path until you change something.",
+      "source": "RFC 2328 §C.3"
+    }
+  ],
+  "simplified": [
+    {
+      "id": "S1",
+      "text": "One area, point-to-point links only, and one router per site.",
+      "real": "Real networks have areas, shared segments with Designated Routers, stub networks, external routes and virtual links."
+    },
+    {
+      "id": "S2",
+      "text": "One cost per link, used in both directions.",
+      "real": "Real OSPF cost is set per interface, so the two directions can differ."
+    },
+    {
+      "id": "S3",
+      "text": "Convergence is instant. Failure detection, flooding and the path calculation all finish in one simulation step. The reconvergence ripple is a visual effect.",
+      "real": "Real routers take time to detect a failure and flood the news. They disagree briefly and can loop packets."
+    },
+    {
+      "id": "S4",
+      "text": "Equal-cost sharing is per packet, in strict rotation, so the split is exact and visible. It is not a player tool in this version, where each router keeps one route.",
+      "real": "Real routers keep each flow on one path, usually by hashing, to avoid reordering (RFC 2991)."
+    },
+    {
+      "id": "S5",
+      "text": "Packets are one size. Each link direction serves a fixed number of packets per second from a short first-in-first-out queue. A packet that arrives at a full queue is dropped. Senders never slow down.",
+      "real": "Real networks carry packets of many sizes, TCP backs off under loss, and routers use QoS classes and active queue management."
+    },
+    {
+      "id": "S6",
+      "text": "New links get cost 10. Upgrading capacity does not change cost.",
+      "real": "RFC 2328 does not say how to choose a cost. Deriving it from bandwidth is a common vendor default, not part of the standard."
+    },
+    {
+      "id": "S7",
+      "text": "With one route kept, a tie goes to the neighbor with the lowest router ID.",
+      "real": "RFC 2328 does not say which route to keep. Implementations differ."
+    },
+    {
+      "id": "S8",
+      "text": "One pulse is one simulated packet, an abstract unit of traffic.",
+      "real": "A real backbone carries billions of packets."
+    },
+    {
+      "id": "S9",
+      "text": "Only links fail. Sites and routers never fail.",
+      "real": "Real routers fail too."
+    },
+    {
+      "id": "S10",
+      "text": "Packets on a link, or queued for it, are lost when it is cut or removed.",
+      "real": "That is broadly true of a fiber cut. Real loss also continues until convergence completes."
+    },
+    {
+      "id": "S11",
+      "text": "Travel time along a link is proportional to its length on the map, scaled for play.",
+      "real": "Real propagation delay is far smaller than shown."
+    }
+  ],
+  "reasons": {
+    "no-such-site": "That site is not on the map yet.",
+    "same-site": "A link needs two different sites.",
+    "duplicate-link": "Those two sites already have a link.",
+    "not-enough-fiber": "Not enough fiber for that link.",
+    "no-such-link": "That link no longer exists.",
+    "link-is-cut": "A cut link cannot be removed until it is repaired.",
+    "bad-cost": "Cost must be a whole number from 1 to 65535.",
+    "no-upgrade": "No capacity upgrade in stock. Rewards add upgrades.",
+    "max-tier": "This link is already at the top capacity tier.",
+    "no-reward-pending": "There is no reward to choose right now.",
+    "bad-choice": "Choose fiber or an upgrade.",
+    "run-over": "The run has ended.",
+    "bad-seed": "A seed is 1 to 24 letters, digits or hyphens.",
+    "no-storage": "This device refused storage, so best scores are not being kept."
+  },
+  "events": {
+    "start": "The first {count} sites start sending traffic in {seconds} seconds. Link them before then.",
+    "cut": "Fiber cut: {link}. Traffic is rerouting.",
+    "restored": "Repaired: {link}.",
+    "dark": "{site} has no path. Its traffic is being dropped.",
+    "appeared": "New site: {site}. It starts sending traffic in {seconds} seconds.",
+    "active": "{site} is now sending traffic.",
+    "laid": "Link {link} laid, {km} km.",
+    "removed": "Link {link} removed. {km} km of fiber returned.",
+    "pending": "Queued. It takes effect when play resumes."
+  },
+  "help": [
+    "Drag from one site to another to lay a link.",
+    "Tap a link to change its cost, upgrade it or remove it.",
+    "Pause at any time with Space or the pause button. Every tool works while paused.",
+    "Changes made while paused all take effect together when you resume.",
+    "Press I for the inspector: every link, every site and each router's table."
+  ]
+}

@@ -1,0 +1,552 @@
+/* No color is written in this file. Every color is a variable set at start-up from
+   src/content/palette.json (FR-032). Sizes hang off one unit, --u, so that no text is
+   smaller than 16 CSS pixels at 1920×1080 or 11 at 844×390 (FR-037). */
+
+:root {
+  --u: clamp(11px, 1.55vh, 20px);
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --bar: max(44px, calc(var(--u) * 3.1));
+  --gap: calc(var(--u) * 0.6);
+  --glass: color-mix(in srgb, var(--c-panel) 88%, transparent);
+  --glass-strong: color-mix(in srgb, var(--c-panel) 96%, transparent);
+  --hair: color-mix(in srgb, var(--c-border) 85%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--c-background);
+  color: var(--c-text);
+  font: 400 var(--u) / 1.45 var(--sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#overlay:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: -4px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+h1 {
+  font-size: calc(var(--u) * 2.6);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: calc(var(--u) * 1.3);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: calc(var(--u) * 1.05);
+  font-weight: 600;
+  color: var(--c-textMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: calc(var(--u) * 1.1);
+}
+
+.note {
+  color: var(--c-textMuted);
+}
+
+.lead {
+  font-size: calc(var(--u) * 1.15);
+}
+
+.alert {
+  color: var(--c-congestion);
+  min-height: 1.45em;
+}
+
+/* --- controls --------------------------------------------------------------------- */
+
+button,
+input,
+select {
+  font: inherit;
+  color: var(--c-text);
+  min-height: 44px;
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  background: var(--glass-strong);
+  padding: 0 calc(var(--u) * 0.9);
+}
+
+button {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--c-focus);
+}
+
+button:disabled {
+  color: var(--c-textMuted);
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+button.primary {
+  border-color: var(--c-focus);
+  font-weight: 600;
+}
+
+button[aria-pressed="true"] {
+  border-color: var(--c-focus);
+  box-shadow: inset 0 -3px 0 var(--c-focus);
+}
+
+input {
+  font-family: var(--mono);
+  min-width: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+  margin-top: calc(var(--u) * 0.8);
+}
+
+/* --- HUD -------------------------------------------------------------------------- */
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: var(--bar);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 calc(var(--u) * 1.6);
+  padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+  background: var(--glass);
+  border-bottom: 1px solid var(--hair);
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--u) * 0.5);
+  white-space: nowrap;
+}
+
+.stat-label {
+  color: var(--c-textMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: calc(var(--u) * 1.15);
+}
+
+.stat-meter {
+  align-items: center;
+}
+
+.meter {
+  display: inline-block;
+  width: calc(var(--u) * 9);
+  height: calc(var(--u) * 0.8);
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  overflow: hidden;
+  /* Stripes are the meter's second cue: it reads as filling even without color. */
+  background: repeating-linear-gradient(90deg, transparent 0 9%, var(--hair) 9% 10%);
+}
+
+.meter-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--c-congestion);
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: var(--bar);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+  padding-bottom: max(calc(var(--u) * 0.3), env(safe-area-inset-bottom));
+  background: var(--glass);
+  border-top: 1px solid var(--hair);
+}
+
+.tools,
+.controls-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.status {
+  position: absolute;
+  top: calc(var(--bar) + var(--u) * 0.6);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 92vw;
+  padding: calc(var(--u) * 0.35) calc(var(--u) * 0.9);
+  background: var(--glass-strong);
+  border: 1px solid var(--c-focus);
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.messages {
+  position: absolute;
+  left: calc(var(--u) * 1);
+  bottom: calc(var(--bar) + var(--u) * 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.35);
+  max-width: min(92vw, calc(var(--u) * 34));
+  pointer-events: none;
+}
+
+.message {
+  padding: calc(var(--u) * 0.35) calc(var(--u) * 0.8);
+  background: var(--glass-strong);
+  border: 1px solid var(--hair);
+  border-left: 4px solid var(--c-focus);
+  border-radius: 4px;
+}
+
+.message.warn {
+  border-left-color: var(--c-congestion);
+}
+
+.message.fail {
+  border-left-color: var(--c-failure);
+}
+
+/* --- panels ----------------------------------------------------------------------- */
+
+.panel {
+  position: absolute;
+  background: var(--glass-strong);
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  padding: calc(var(--u) * 1);
+  overflow: auto;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+.inspector {
+  top: calc(var(--bar) + var(--u) * 0.5);
+  right: calc(var(--u) * 0.5);
+  bottom: calc(var(--bar) + var(--u) * 0.5);
+  width: min(calc(var(--u) * 38), 94vw);
+}
+
+.site-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) * 0.4);
+  margin-top: calc(var(--u) * 0.5);
+}
+
+.site-list button {
+  font-family: var(--mono);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: calc(var(--u) * 0.5);
+  font-family: var(--mono);
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: middle;
+  padding: calc(var(--u) * 0.25) calc(var(--u) * 0.5);
+  border-bottom: 1px solid var(--hair);
+}
+
+th {
+  color: var(--c-textMuted);
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+td.is-congested {
+  color: var(--c-congestion);
+}
+
+td.is-cut {
+  color: var(--c-failure);
+}
+
+.linkpanel {
+  left: 50%;
+  bottom: calc(var(--bar) + var(--u) * 0.5);
+  transform: translateX(-50%);
+  width: min(calc(var(--u) * 36), 96vw);
+  max-height: calc(100% - var(--bar) * 2 - var(--u));
+}
+
+.linkpanel input {
+  width: calc(var(--u) * 7);
+}
+
+.dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(calc(var(--u) * 34), 94vw);
+  padding: calc(var(--u) * 1.4);
+  background: var(--glass-strong);
+  border: 1px solid var(--c-focus);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.dialog .row {
+  justify-content: center;
+}
+
+.gameover {
+  top: calc(var(--bar) + var(--u) * 0.5);
+  left: calc(var(--u) * 0.5);
+  width: min(calc(var(--u) * 30), 94vw);
+  max-height: calc(100% - var(--bar) - var(--u));
+  border-color: var(--c-focus);
+}
+
+.results {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: calc(var(--u) * 0.2) calc(var(--u) * 1);
+  margin-top: calc(var(--u) * 0.8);
+}
+
+.results dt {
+  color: var(--c-textMuted);
+}
+
+.results dd {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: calc(var(--u) * 1.15);
+}
+
+/* --- screens ---------------------------------------------------------------------- */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: calc(var(--u) * 1.5);
+  overflow: auto;
+  background: color-mix(in srgb, var(--c-backgroundDeep) 55%, transparent);
+}
+
+.hero {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+}
+
+.card {
+  position: relative;
+  width: min(calc(var(--u) * 40), 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: calc(var(--u) * 1.6);
+  background: var(--glass);
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+}
+
+.card.wide {
+  width: min(calc(var(--u) * 62), 100%);
+  margin: 0 auto;
+  background: var(--glass-strong);
+}
+
+.card h2 {
+  margin-top: calc(var(--u) * 1.2);
+}
+
+.briefing {
+  margin-top: calc(var(--u) * 0.9);
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1);
+  border-left: 4px solid var(--c-focus);
+  background: var(--glass-strong);
+  font-size: calc(var(--u) * 1.2);
+  font-weight: 600;
+}
+
+#seed {
+  width: calc(var(--u) * 13);
+}
+
+.scores {
+  margin-top: calc(var(--u) * 0.4);
+  padding-left: calc(var(--u) * 1.6);
+  font-family: var(--mono);
+}
+
+.help,
+.notes {
+  margin-top: calc(var(--u) * 0.8);
+  padding-left: calc(var(--u) * 1.2);
+}
+
+.help li {
+  color: var(--c-textMuted);
+}
+
+.notes li {
+  margin-top: calc(var(--u) * 0.6);
+}
+
+.notes .tag {
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--c-focus);
+  margin-right: calc(var(--u) * 0.5);
+}
+
+.notes .aside {
+  display: block;
+  color: var(--c-textMuted);
+}
+
+.fatal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--u) * 2);
+  background: var(--c-background);
+  color: var(--c-congestion);
+  text-align: center;
+}
+
+/* hud=0 is for capturing the hero art: the map alone, with no controls and no focus outline. */
+.app[data-hud="off"] #overlay:focus-visible {
+  outline: none;
+}
+
+
+.app[data-hud="off"] .hud,
+.app[data-hud="off"] .controls,
+.app[data-hud="off"] .messages,
+.app[data-hud="off"] .status {
+  display: none;
+}
+
+/* --- small and upright screens ------------------------------------------------------ */
+
+@media (max-height: 520px) {
+  .hud {
+    gap: 0 calc(var(--u) * 1.1);
+  }
+  .card {
+    padding: calc(var(--u) * 1);
+  }
+  h1 {
+    font-size: calc(var(--u) * 2);
+  }
+}
+
+@media (orientation: portrait) {
+  /* Portrait stacks the HUD: the stats wrap into rows and the controls sit in two rows. */
+  .hud {
+    gap: 0 calc(var(--u) * 1.2);
+  }
+  .stat {
+    flex: 1 1 40%;
+  }
+  .controls {
+    justify-content: center;
+  }
+  .inspector {
+    left: calc(var(--u) * 0.5);
+    width: auto;
+    top: 34%;
+  }
+  .gameover {
+    right: calc(var(--u) * 0.5);
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .meter-fill {
+    transition: width 0.2s linear;
+  }
+}

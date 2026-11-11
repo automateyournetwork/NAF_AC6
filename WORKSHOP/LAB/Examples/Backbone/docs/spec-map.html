@@ -1,0 +1,257 @@
+<title>Backbone Spec Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the documents are sites on a route. One lit path runs left to right through them, with
+   two gates on it; below, one requirement is traced along the same path, then slices and records. */
+:root {
+  color-scheme: dark;
+  --bg: #050a18;
+  --panel: #0b1530;
+  --panel-2: #0f1c3f;
+  --line: #1c2c58;
+  --text: #eaf6ff;
+  --muted: #9db4d6;
+  --cyan: #3fe0ff;
+  --blue: #2d7bff;
+  --amber: #ffb020;
+  --magenta: #ff5ae0;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  background-image: radial-gradient(1200px 500px at 50% -10%, rgba(45, 123, 255, .18), transparent 70%);
+  color: var(--text); font: 400 16px/1.5 var(--sans);
+  padding-block: 40px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3, p, ul, ol, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+header { display: flex; flex-direction: column; gap: 14px; }
+h1 { font: 700 clamp(28px, 3.4vw, 46px)/1.08 var(--sans); letter-spacing: -.01em; text-wrap: balance; max-width: 22em; }
+.lead { color: var(--muted); font-size: clamp(16px, 1.25vw, 19px); max-width: 62ch; }
+h2 { font: 600 13px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 18px; }
+code, .file { font-family: var(--mono); }
+
+/* ---------- the route ---------- */
+.route { display: flex; align-items: stretch; }
+.site {
+  flex: 1 1 0; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--cyan);
+  border-radius: 10px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 0 28px rgba(63, 224, 255, .07);
+}
+.site .q { font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+.site h3 { font: 700 22px/1.15 var(--sans); }
+.site .file { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.site p { color: var(--muted); font-size: 15px; }
+.site ul { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.site li { display: flex; gap: 8px; align-items: baseline; }
+.site li b { font: 600 12px/1.4 var(--mono); color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.site li span { color: var(--muted); min-width: 0; }
+.site.build { border-top-color: var(--blue); }
+.hop { flex: 0 0 34px; position: relative; }
+.hop::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); background: linear-gradient(90deg, var(--cyan), var(--blue)); box-shadow: 0 0 12px rgba(63, 224, 255, .8); }
+.hop::after { content: ""; position: absolute; right: -1px; top: 50%; width: 9px; height: 9px; border-top: 3px solid var(--blue); border-right: 3px solid var(--blue); transform: translateY(-50%) rotate(45deg); }
+.gate {
+  flex: 0 0 132px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; text-align: center;
+  position: relative; padding: 0 8px;
+}
+.gate::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); background: var(--amber); box-shadow: 0 0 12px rgba(255, 176, 32, .7); }
+.gate > * { position: relative; }
+.gate .badge { font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--bg); background: var(--amber); border-radius: 999px; padding: 6px 10px; }
+.gate .what { font-size: 13px; line-height: 1.35; color: var(--text); background: var(--bg); padding: 4px 2px; }
+
+/* ---------- one requirement, traced ---------- */
+.trace { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.trace li { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid var(--line); position: relative; }
+.trace li:first-child { border-left: 0; }
+.trace .where { font: 600 11px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.trace .id { font: 700 20px/1 var(--mono); color: var(--cyan); }
+.trace p { font-size: 14px; color: var(--text); }
+.trace p small { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.trace li:last-child .id { color: var(--amber); }
+
+/* ---------- slices ---------- */
+.slices { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; counter-reset: s; }
+.slices li { counter-increment: s; border-left: 3px solid var(--blue); padding: 2px 0 2px 12px; display: flex; flex-direction: column; gap: 4px; }
+.slices li::before { content: "Stretch " counter(s); font: 600 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--blue); }
+.slices b { font: 600 16px/1.25 var(--sans); }
+.slices span { font-size: 13.5px; color: var(--muted); }
+
+/* ---------- records ---------- */
+.records { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 40px; }
+.records li { display: grid; grid-template-columns: minmax(0, 15em) minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.records .file { font-size: 13.5px; color: var(--cyan); overflow-wrap: anywhere; }
+.records span { font-size: 14px; color: var(--muted); }
+
+/* ---------- totals ---------- */
+.totals { display: flex; flex-wrap: wrap; gap: 14px 44px; border-top: 1px solid var(--line); padding-top: 22px; }
+.totals div { display: flex; align-items: baseline; gap: 10px; }
+.totals b { font: 700 30px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+.totals span { font-size: 14px; color: var(--muted); }
+footer { color: var(--muted); font-size: 13px; }
+
+@media (max-width: 1180px) {
+  .route { flex-direction: column; }
+  .hop { flex-basis: 30px; }
+  .hop::before { left: 50%; right: auto; top: 0; bottom: 0; width: 3px; height: auto; transform: translateX(-50%); background: linear-gradient(180deg, var(--cyan), var(--blue)); }
+  .hop::after { right: auto; left: 50%; top: auto; bottom: 0; transform: translateX(-50%) rotate(135deg); }
+  .gate { flex-basis: auto; padding: 14px 0; }
+  .gate::before { left: 50%; right: auto; top: 0; bottom: 0; width: 3px; height: auto; transform: translateX(-50%); }
+  .trace { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trace li { border-top: 1px solid var(--line); }
+  .trace li:nth-child(odd) { border-left: 0; }
+  .trace li:nth-child(-n+2) { border-top: 0; }
+  .slices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+  .records { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .trace, .slices { grid-template-columns: minmax(0, 1fr); }
+  .trace li, .trace li:nth-child(-n+2) { border-left: 0; border-top: 1px solid var(--line); }
+  .trace li:first-child { border-top: 0; }
+  .records li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+</style>
+
+<main>
+  <header>
+    <p class="eyebrow">Backbone · spec-driven development with Spec Kit</p>
+    <h1>The game was rebuilt through seven Spec Kit steps, each one feeding the next.</h1>
+    <p class="lead">Three files the owner had approved went in. The constitution came first and was reviewed by the owner, who decided five conflicts and then asked for the remaining steps to run unattended. The simulation was proven with no graphics before anything was drawn.</p>
+  </header>
+
+  <section aria-labelledby="route-h">
+    <h2 id="route-h">The route from the inputs to the code</h2>
+    <div class="route">
+      <article class="site">
+        <span class="q">Step 1 · what never changes</span>
+        <h3>Constitution</h3>
+        <span class="file">.specify/memory/constitution.md · v1.1.0</span>
+        <p>Seven principles from <span class="file">StarterKit/CONSTITUTION.md</span>, each with the evidence that proves it was kept.</p>
+        <ul>
+          <li><b>C1</b><span>Technical truth is a release requirement</span></li>
+          <li><b>C2</b><span>The player learns by shaping, then watching</span></li>
+          <li><b>C3</b><span>Pressure comes from growth, never reflexes</span></li>
+          <li><b>C4</b><span>Access is part of the core game</span></li>
+          <li><b>C5</b><span>Deterministic and self-contained</span></li>
+          <li><b>C6</b><span>Content and logic reviewed separately</span></li>
+          <li><b>C7</b><span>Done is demonstrated</span></li>
+        </ul>
+      </article>
+      <div class="gate">
+        <span class="badge">Owner</span>
+        <span class="what">Reviews step 1 and decides conflicts K1–K5</span>
+        <span class="badge">Go</span>
+        <span class="what">Steps 2–7 run unattended</span>
+      </div>
+      <article class="site">
+        <span class="q">Steps 2–3 · what it does</span>
+        <h3>Specify, clarify</h3>
+        <span class="file">specs/001-backbone-first-playable/spec.md</span>
+        <p>Observable behavior only. Five clarifications, answered by the agent and marked for review.</p>
+        <ul>
+          <li><b>F1–F8</b><span>Faithful to RFC 2328, each with its section</span></li>
+          <li><b>S1–S11</b><span>Simplified for play, stated openly</span></li>
+          <li><b>FR-001–040</b><span>Requirements, carrying rules R1–R14</span></li>
+          <li><b>AC1–AC26</b><span>Acceptance criteria in five stories</span></li>
+          <li><b>Cases 1–12</b><span>Routing results worked by hand</span></li>
+        </ul>
+      </article>
+      <div class="hop" aria-hidden="true"></div>
+      <article class="site">
+        <span class="q">Step 4 · how it is built</span>
+        <h3>Plan</h3>
+        <span class="file">plan.md · research.md · data-model.md · contracts/ · quickstart.md</span>
+        <p>Stack, files, the simulation's contract, and ten contradictions resolved in the open.</p>
+        <ul>
+          <li><b>Stack</b><span>TypeScript, Vite, no runtime dependencies</span></li>
+          <li><b>Contract</b><span>The order of work inside one simulation step</span></li>
+          <li><b>Data</b><span>Tuning, palette, region and text as files</span></li>
+          <li><b>Gate</b><span>Constitution Check: C1–C7, no violation</span></li>
+        </ul>
+      </article>
+      <div class="hop" aria-hidden="true"></div>
+      <article class="site">
+        <span class="q">Steps 5–6 · what to do, and is it consistent</span>
+        <h3>Tasks, analyze</h3>
+        <span class="file">tasks.md · 70 tasks · docs/verification/analysis.md</span>
+        <p>Every task names what it serves. The analysis found 15 issues; all were fixed and it was run again.</p>
+        <ul>
+          <li><b>Phase 2</b><span>The simulation first, tests before code</span></li>
+          <li><b>1 critical</b><span>The color rule let stray green or red stand</span></li>
+          <li><b>40 / 40</b><span>Requirements named by a task after the fixes</span></li>
+        </ul>
+      </article>
+      <div class="hop" aria-hidden="true"></div>
+      <article class="site build">
+        <span class="q">Step 7 · then, and only then</span>
+        <h3>Implement</h3>
+        <span class="file">src/ · tests/ · tools/ · dist/</span>
+        <p>Routing engine and its tests first. The WebGL effects last.</p>
+        <ul>
+          <li><b>124</b><span>Unit tests</span></li>
+          <li><b>74</b><span>End-to-end tests, desktop and phone sizes</span></li>
+          <li><b>320</b><span>Random graphs checked against a brute-force oracle</span></li>
+          <li><b>21 / 21</b><span>Routes match FRR, a real OSPF implementation</span></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="trace-h">
+    <h2 id="trace-h">One requirement, followed along the whole route</h2>
+    <ol class="trace">
+      <li><span class="where">Constitution</span><span class="id">C3</span><p>A run ends only through the drop meter, whose rules are stated exactly in the spec.</p></li>
+      <li><span class="where">Input spec</span><span class="id">R7</span><p>"Drains slowly while no packets are being dropped."<small>Not exact: flagged in step 1 as L1</small></p></li>
+      <li><span class="where">Spec</span><span class="id">FR-010</span><p>Size 100. Falls by 1 after 3 s without a drop, then 1 a second. A drop restarts the wait.</p></li>
+      <li><span class="where">Plan</span><span class="id">Step 11</span><p>The meter is the eleventh piece of work in a simulation step.<small>contracts/simulation.md</small></p></li>
+      <li><span class="where">Tasks</span><span class="id">T021</span><p>A failing test for the rule, written before <code>world.ts</code>.<small>T026 checks the data file holds 100, 3 and 1</small></p></li>
+      <li><span class="where">Evidence</span><span class="id">Pass</span><p>The test passes; draining one step late makes it fail. In the browser the meter rises by exactly the drops.<small>AC7, step by step to game over</small></p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="slices-h">
+    <h2 id="slices-h">Six stretches of work, each closed by evidence</h2>
+    <ol class="slices">
+      <li><b>Prove the routing</b><span>Cases 1–7 pass; the oracle agrees</span></li>
+      <li><b>Prove the run</b><span>Cases 8–12; same seed, same run</span></li>
+      <li><b>Five stories</b><span>Playable in the fallback renderer</span></li>
+      <li><b>The four effects</b><span>WebGL renderer; same scene, checked</span></li>
+      <li><b>No green, no red</b><span>Census of screenshots: zero</span></li>
+      <li><b>Package</b><span>Fresh copy passes every check</span></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="records-h">
+    <h2 id="records-h">Records kept alongside</h2>
+    <ul class="records">
+      <li><span class="file">StarterKit/</span><span>The three inputs the owner approved on 2026-11-09. Read, never edited.</span></li>
+      <li><span class="file">docs/PID.md</span><span>Project initiation document: purpose, evaluation, failure modes, guardrails</span></li>
+      <li><span class="file">tests/fixtures/ospf-cases.json</span><span>The spec's hand-worked cases, typed in as the expected test values</span></li>
+      <li><span class="file">docs/verification/</span><span>Results, the analysis report, a packet traced by hand, the text review, the FRR result, the videos</span></li>
+      <li><span class="file">PROVENANCE.md</span><span>Tools, sources and every verification step, recorded as they happened</span></li>
+      <li><span class="file">docs/capture-log.md</span><span>Timeline, steps and results, gotchas, questions and answers, open items</span></li>
+      <li><span class="file">docs/runbook.html</span><span>The capture log as a one-file build book</span></li>
+      <li><span class="file">docs/secure-build-checklist.md</span><span>Which security rules apply, and three exceptions the owner accepted</span></li>
+      <li><span class="file">README.md · ARCADE.md</span><span>How to play and run it, the verification table, and the Arcade submission</span></li>
+    </ul>
+  </section>
+
+  <div class="totals">
+    <div><b>7</b><span>Spec Kit steps</span></div>
+    <div><b>7</b><span>principles</span></div>
+    <div><b>12</b><span>hand-worked cases</span></div>
+    <div><b>26</b><span>acceptance criteria</span></div>
+    <div><b>70</b><span>tasks</span></div>
+    <div><b>198</b><span>tests passing</span></div>
+    <div><b>0</b><span>green or red pixels</span></div>
+  </div>
+  <footer>Backbone · rebuilt with Claude Code and GitHub Spec Kit 1.2.2 on branch speckit-rebuild · the hand-built version is tag v1-handbuilt</footer>
+</main>

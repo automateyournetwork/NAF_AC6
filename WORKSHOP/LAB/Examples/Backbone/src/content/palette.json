@@ -1,0 +1,19 @@
+{
+  "background": "#050a18",
+  "backgroundDeep": "#02050d",
+  "panel": "#0a1430",
+  "land": "#081229",
+  "grid": "#1b2b5c",
+  "coast": "#2a3f80",
+  "border": "#1b2b5c",
+  "link": "#2d7bff",
+  "linkBright": "#3fe0ff",
+  "accent": "#5b5bd6",
+  "pulse": "#eaf6ff",
+  "site": "#eaf6ff",
+  "text": "#eaf6ff",
+  "textMuted": "#8fa8d0",
+  "focus": "#3fe0ff",
+  "congestion": "#ffb020",
+  "failure": "#ff2bd6"
+}

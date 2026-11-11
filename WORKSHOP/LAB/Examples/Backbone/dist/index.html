@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Backbone</title>
+    <meta name="description" content="Build and operate a backbone network. Every packet takes the lowest-cost path." />
+    <script type="module" crossorigin src="./assets/index-BMpPcr-9.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CEx1kF-Z.css">
+  </head>
+  <body>
+    <div id="app" class="app" data-screen="welcome">
+      <canvas id="map" class="layer" aria-hidden="true"></canvas>
+      <canvas
+        id="overlay"
+        class="layer"
+        tabindex="0"
+        role="application"
+        aria-label="Network map. Drag from one site to another to lay a link. Arrow keys pan, plus and minus zoom. The inspector lists every site and link as text."
+      ></canvas>
+
+      <header id="hud" class="hud" hidden>
+        <div class="stat"><span class="stat-label">Fiber</span><span class="stat-value" id="hud-fiber">0 km</span></div>
+        <div class="stat"><span class="stat-label">Upgrades</span><span class="stat-value" id="hud-upgrades">0</span></div>
+        <div class="stat stat-meter">
+          <span class="stat-label" id="hud-meter-label">Drops</span>
+          <span class="meter" id="hud-meter" role="meter" aria-labelledby="hud-meter-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="meter-fill" id="hud-meter-fill"></span>
+          </span>
+          <span class="stat-value" id="hud-meter-text">0 / 100</span>
+        </div>
+        <div class="stat"><span class="stat-label">Delivered</span><span class="stat-value" id="hud-score">0</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value" id="hud-time">0:00</span></div>
+        <div class="stat"><span class="stat-label">Seed</span><span class="stat-value" id="hud-seed"></span></div>
+      </header>
+
+      <p id="status" class="status" hidden></p>
+      <div id="messages" class="messages" role="status" aria-live="polite"></div>
+
+      <nav id="controls" class="controls" hidden aria-label="Game controls">
+        <div class="tools" role="group" aria-label="Tools">
+          <button type="button" class="tool" id="tool-1" data-tool="link" aria-pressed="true">1 Link</button>
+          <button type="button" class="tool" id="tool-2" data-tool="cost" aria-pressed="false">2 Cost</button>
+          <button type="button" class="tool" id="tool-3" data-tool="upgrade" aria-pressed="false">3 Upgrade</button>
+          <button type="button" class="tool" id="tool-4" data-tool="remove" aria-pressed="false">4 Remove</button>
+        </div>
+        <div class="controls-right">
+          <button type="button" id="btn-about-run">About the model</button>
+          <button type="button" id="btn-inspector" aria-expanded="false" aria-controls="inspector">Inspector</button>
+          <button type="button" id="btn-pause" class="primary" aria-pressed="false">Pause</button>
+        </div>
+      </nav>
+
+      <aside id="inspector" class="panel inspector" hidden aria-label="Inspector">
+        <div class="panel-head">
+          <h2>Inspector</h2>
+          <button type="button" id="inspector-close">Close inspector</button>
+        </div>
+        <p id="inspector-hint" class="note"></p>
+        <h3 id="sites-title">Sites</h3>
+        <ul id="site-list" class="site-list" aria-labelledby="sites-title"></ul>
+        <h3 id="links-title">Links</h3>
+        <table id="link-table" aria-labelledby="links-title">
+          <thead>
+            <tr>
+              <th scope="col">Link</th>
+              <th scope="col">Cost</th>
+              <th scope="col">Capacity</th>
+              <th scope="col">Utilization</th>
+              <th scope="col">State</th>
+            </tr>
+          </thead>
+          <tbody id="link-rows"></tbody>
+        </table>
+        <p id="link-empty" class="note">No links yet.</p>
+        <h3 id="route-title">Router table</h3>
+        <p id="route-note" class="note">Select a site to see its router's table.</p>
+        <table id="route-table" aria-labelledby="route-title" hidden>
+          <thead>
+            <tr>
+              <th scope="col">Destination</th>
+              <th scope="col">Total cost</th>
+              <th scope="col">Next hop</th>
+            </tr>
+          </thead>
+          <tbody id="route-rows"></tbody>
+        </table>
+      </aside>
+
+      <section id="linkpanel" class="panel linkpanel" hidden aria-labelledby="lp-title">
+        <div class="panel-head">
+          <h2 id="lp-title">Link</h2>
+          <button type="button" id="lp-close">Close</button>
+        </div>
+        <p id="lp-state" class="note"></p>
+        <div class="row">
+          <label for="lp-cost">Cost</label>
+          <button type="button" id="lp-minus" aria-label="Lower cost by 1">−</button>
+          <input id="lp-cost" type="text" inputmode="numeric" autocomplete="off" aria-describedby="lp-cost-help" />
+          <button type="button" id="lp-plus" aria-label="Raise cost by 1">+</button>
+          <button type="button" id="lp-set">Set cost</button>
+        </div>
+        <p id="lp-cost-help" class="note">A whole number from 1 to 65535. Traffic takes the lowest total cost.</p>
+        <div class="row">
+          <span id="lp-capacity"></span>
+          <button type="button" id="lp-upgrade">Upgrade capacity</button>
+        </div>
+        <div class="row">
+          <button type="button" id="lp-remove">Remove link</button>
+        </div>
+        <p id="lp-message" class="alert" role="alert"></p>
+      </section>
+
+      <section id="reward" class="dialog" hidden role="dialog" aria-labelledby="reward-title">
+        <h2 id="reward-title">Choose a reward</h2>
+        <p>Time is stopped. Take as long as you like. Changes you make now wait until you choose.</p>
+        <div class="row">
+          <button type="button" id="reward-fiber" class="primary"></button>
+          <button type="button" id="reward-upgrade" class="primary"></button>
+        </div>
+      </section>
+
+      <section id="welcome" class="screen" aria-labelledby="welcome-title">
+        <div class="hero" id="hero" aria-hidden="true"></div>
+        <div class="card">
+          <h1 id="welcome-title">Backbone</h1>
+          <p id="welcome-pitch" class="lead"></p>
+          <p id="welcome-briefing" class="briefing"></p>
+          <form id="start-form" class="row" novalidate>
+            <label for="seed">Seed</label>
+            <input id="seed" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" aria-describedby="seed-help" />
+            <button type="button" id="seed-random">Random seed</button>
+            <button type="submit" id="start" class="primary">Start</button>
+          </form>
+          <p id="seed-help" class="note">1 to 24 letters, digits or hyphens. The same seed gives the same run. Leave it empty for a random one.</p>
+          <p id="seed-error" class="alert" role="alert"></p>
+          <h2 id="scores-title">Best scores on this device</h2>
+          <ol id="scores" class="scores" aria-labelledby="scores-title"></ol>
+          <p id="scores-note" class="note"></p>
+          <div class="row">
+            <button type="button" id="btn-about">About the model</button>
+            <label for="motion">Motion</label>
+            <select id="motion">
+              <option value="auto">Follow this device</option>
+              <option value="on">Reduced</option>
+              <option value="off">Full</option>
+            </select>
+          </div>
+          <ul id="help" class="help"></ul>
+        </div>
+      </section>
+
+      <section id="about" class="screen" hidden aria-labelledby="about-title">
+        <div class="card wide">
+          <div class="panel-head">
+            <h1 id="about-title">About the model</h1>
+            <button type="button" id="about-close" class="primary">Close</button>
+          </div>
+          <p class="lead">The game models single-area OSPFv2 (RFC 2328) over point-to-point links. This is what it keeps faithful and what it simplifies for play.</p>
+          <h2>Faithful to RFC 2328</h2>
+          <ul id="about-faithful" class="notes"></ul>
+          <h2>Simplified for play</h2>
+          <ul id="about-simplified" class="notes"></ul>
+        </div>
+      </section>
+
+      <section id="gameover" class="panel gameover" hidden aria-labelledby="over-title">
+        <h2 id="over-title">Run over</h2>
+        <p class="note">The drop meter is full.</p>
+        <dl class="results">
+          <dt>Traffic delivered</dt>
+          <dd id="over-score">0</dd>
+          <dt>Time survived</dt>
+          <dd id="over-time">0:00</dd>
+          <dt>Seed</dt>
+          <dd id="over-seed"></dd>
+          <dt>Dropped</dt>
+          <dd id="over-drops"></dd>
+        </dl>
+        <p id="over-lapse" class="note"></p>
+        <div class="row">
+          <button type="button" id="over-new" class="primary">New run</button>
+          <button type="button" id="over-again">Play this seed again</button>
+          <button type="button" id="over-replay">Watch the time-lapse again</button>
+        </div>
+      </section>
+
+      <p id="fatal" class="fatal" role="alert" hidden></p>
+    </div>
+  </body>
+</html>

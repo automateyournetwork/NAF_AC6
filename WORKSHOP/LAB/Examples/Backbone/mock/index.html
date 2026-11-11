@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backbone play screen mock</title>
+<style>
+  :root { --navy:#050a18; --panel:#0b1530; --line:#1c2c58; --ice:#eaf6ff; --muted:#9db4d6; --cyan:#3fe0ff; --amber:#ffb020; --magenta:#ff2bd6; }
+  body { margin:0; background:var(--navy); color:var(--ice); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:1500px; margin:0 auto; padding:28px 16px 60px; }
+  h1 { font-size:1.7rem; margin:0 0 4px; } h2 { font-size:1.1rem; color:var(--cyan); margin:34px 0 10px; }
+  p { color:var(--muted); margin:0 0 12px; max-width:75ch; }
+  img { display:block; max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; }
+  a { color:var(--cyan); }
+  .key { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; }
+  .key div { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:flex; gap:12px; align-items:center; }
+  .key svg { flex:none; width:96px; height:34px; } .key b { display:block; } .key span { color:var(--muted); font-size:.88rem; }
+</style></head><body><main>
+<h1>Backbone play screen mock</h1>
+<p>A static picture of the v1 play screen. Nothing is simulated: the numbers, pulse positions and the coastline are hand-placed placeholders. <a href="play.html">play.html</a> is the same scene with motion: pulses, sweep, ripple and ping loop decoratively. Resize the window to see it reflow.</p>
+<h2>Desktop and stage, 1920 × 1080</h2>
+<img src="desktop-1920x1080.png" width="1920" height="1080" alt="Desktop mock: tilted dark map of North America with twelve sites, glowing links with cost labels, an amber congested DEN to CHI link, a magenta cut ATL to NYC link with ripple rings, a drop meter at the top and a toolbar at the bottom">
+<h2>Phone landscape, 844 × 390 (shown at actual pixel size)</h2>
+<img src="phone-844x390.png" width="844" height="390" alt="Phone mock: the same map zoomed out, tools stacked on the left, link options as a bar along the bottom">
+<h2>State key: every color has a second cue</h2>
+<div class="key">
+  <div><svg viewBox="0 0 96 34"><path d="M6 17H90" stroke="#5b5bd6" stroke-width="2.5" stroke-linecap="round"/></svg><p style="margin:0;color:inherit"><b>Light load</b><span>Thin, dim indigo</span></p></div>
+  <div><svg viewBox="0 0 96 34"><path d="M6 17H90" stroke="#3fe0ff" stroke-width="7" stroke-linecap="round"/></svg><p style="margin:0;color:inherit"><b>Busy</b><span>Thicker, brighter cyan, more pulses</span></p></div>
+  <div><svg viewBox="0 0 96 34"><path d="M6 20H90" stroke="#ffb020" stroke-width="8" stroke-linecap="round"/><path d="M6 20H90" stroke="#050a18" stroke-width="5" stroke-dasharray="5 11"/><path d="M48 1L57 15H39Z" fill="#ffb020"/></svg><p style="margin:0;color:inherit"><b>Congested</b><span>Amber, thickest, hatch pattern, warning triangle</span></p></div>
+  <div><svg viewBox="0 0 96 34"><path d="M6 17H38M58 17H90" stroke="#ff2bd6" stroke-width="2.6" stroke-dasharray="9 5"/><circle cx="48" cy="17" r="9" fill="#050a18" stroke="#ff2bd6" stroke-width="2"/><path d="M44 13l8 8M52 13l-8 8" stroke="#ff2bd6" stroke-width="2.4" stroke-linecap="round"/></svg><p style="margin:0;color:inherit"><b>Fiber cut</b><span>Magenta, broken dashed line with a gap, cut icon, repair timer</span></p></div>
+  <div><svg viewBox="0 0 96 34"><circle cx="48" cy="17" r="15" fill="none" stroke="#3fe0ff" stroke-opacity=".4"/><circle cx="48" cy="17" r="8" fill="#050a18" stroke="#eaf6ff" stroke-width="2" stroke-dasharray="3 3"/></svg><p style="margin:0;color:inherit"><b>New site</b><span>Dashed ring, ping circles, NEW tag</span></p></div>
+  <div><svg viewBox="0 0 96 34"><circle cx="48" cy="17" r="10" fill="#050a18" stroke="#8fa8d0" stroke-width="2"/><path d="M40 25L56 9" stroke="#ff2bd6" stroke-width="2.4" stroke-linecap="round"/></svg><p style="margin:0;color:inherit"><b>Dark site (no path)</b><span>Hollow grey ring with a magenta slash; not shown in the scene above</span></p></div>
+</div>
+</main></body></html>

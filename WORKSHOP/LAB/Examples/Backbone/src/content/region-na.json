@@ -1,0 +1,134 @@
+{
+  "id": "na",
+  "name": "North America",
+  "lon0": -96,
+  "lat0": 39,
+  "sites": [
+    {
+      "code": "SEA",
+      "name": "Seattle",
+      "lon": -122.32,
+      "lat": 47.6,
+      "weight": 2
+    },
+    {
+      "code": "SFO",
+      "name": "San Francisco",
+      "lon": -122.4,
+      "lat": 37.78,
+      "weight": 2
+    },
+    {
+      "code": "LAX",
+      "name": "Los Angeles",
+      "lon": -118.23,
+      "lat": 34.05,
+      "weight": 3
+    },
+    {
+      "code": "SLC",
+      "name": "Salt Lake City",
+      "lon": -111.93,
+      "lat": 40.78,
+      "weight": 1
+    },
+    {
+      "code": "PHX",
+      "name": "Phoenix",
+      "lon": -112.07,
+      "lat": 33.45,
+      "weight": 1
+    },
+    {
+      "code": "DEN",
+      "name": "Denver",
+      "lon": -104.99,
+      "lat": 39.74,
+      "weight": 1
+    },
+    {
+      "code": "DFW",
+      "name": "Dallas",
+      "lon": -96.79,
+      "lat": 32.77,
+      "weight": 2
+    },
+    {
+      "code": "HOU",
+      "name": "Houston",
+      "lon": -95.35,
+      "lat": 29.74,
+      "weight": 2
+    },
+    {
+      "code": "MKC",
+      "name": "Kansas City",
+      "lon": -94.61,
+      "lat": 39.11,
+      "weight": 1
+    },
+    {
+      "code": "MSP",
+      "name": "Minneapolis",
+      "lon": -93.25,
+      "lat": 44.98,
+      "weight": 1
+    },
+    {
+      "code": "CHI",
+      "name": "Chicago",
+      "lon": -87.64,
+      "lat": 41.85,
+      "weight": 3
+    },
+    {
+      "code": "ATL",
+      "name": "Atlanta",
+      "lon": -84.37,
+      "lat": 33.74,
+      "weight": 2
+    },
+    {
+      "code": "MIA",
+      "name": "Miami",
+      "lon": -80.23,
+      "lat": 25.79,
+      "weight": 2
+    },
+    {
+      "code": "WAS",
+      "name": "Washington",
+      "lon": -77.01,
+      "lat": 38.9,
+      "weight": 2
+    },
+    {
+      "code": "NYC",
+      "name": "New York",
+      "lon": -74,
+      "lat": 40.72,
+      "weight": 3
+    },
+    {
+      "code": "BOS",
+      "name": "Boston",
+      "lon": -71.07,
+      "lat": 42.33,
+      "weight": 2
+    },
+    {
+      "code": "YTO",
+      "name": "Toronto",
+      "lon": -79.39,
+      "lat": 43.66,
+      "weight": 2
+    },
+    {
+      "code": "YMQ",
+      "name": "Montréal",
+      "lon": -73.59,
+      "lat": 45.5,
+      "weight": 1
+    }
+  ]
+}

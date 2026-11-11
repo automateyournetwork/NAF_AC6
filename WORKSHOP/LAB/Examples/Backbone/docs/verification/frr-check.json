@@ -1,0 +1,310 @@
+{
+  "verdict": "pass",
+  "image": "quay.io/frrouting/frr:10.7.1",
+  "timers": {
+    "hello": 1,
+    "dead": 4
+  },
+  "adjacenciesFull": {
+    "T1": 12,
+    "T2": 14
+  },
+  "compared": 21,
+  "matched": 21,
+  "rows": [
+    {
+      "case": "case 1",
+      "route": "A→C",
+      "expected": {
+        "cost": 20,
+        "nextHops": [
+          "B",
+          "D"
+        ]
+      },
+      "frr": {
+        "cost": 20,
+        "nextHops": [
+          "B",
+          "D"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 2",
+      "route": "A→E",
+      "expected": {
+        "cost": 25,
+        "nextHops": [
+          "B",
+          "D"
+        ]
+      },
+      "frr": {
+        "cost": 25,
+        "nextHops": [
+          "B",
+          "D"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 3",
+      "route": "A→C",
+      "expected": {
+        "cost": 20,
+        "nextHops": [
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      "frr": {
+        "cost": 20,
+        "nextHops": [
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 4",
+      "route": "A→C",
+      "expected": {
+        "cost": 19,
+        "nextHops": [
+          "C"
+        ]
+      },
+      "frr": {
+        "cost": 19,
+        "nextHops": [
+          "C"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 4",
+      "route": "A→E",
+      "expected": {
+        "cost": 24,
+        "nextHops": [
+          "C"
+        ]
+      },
+      "frr": {
+        "cost": 24,
+        "nextHops": [
+          "C"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 5",
+      "route": "A→C",
+      "expected": {
+        "cost": 20,
+        "nextHops": [
+          "D"
+        ]
+      },
+      "frr": {
+        "cost": 20,
+        "nextHops": [
+          "D"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 5",
+      "route": "B→C",
+      "expected": {
+        "cost": 30,
+        "nextHops": [
+          "A"
+        ]
+      },
+      "frr": {
+        "cost": 30,
+        "nextHops": [
+          "A"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 5",
+      "route": "B→E",
+      "expected": {
+        "cost": 35,
+        "nextHops": null
+      },
+      "frr": {
+        "cost": 35,
+        "nextHops": [
+          "A"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 6",
+      "route": "tie-break",
+      "expected": "the game's rule (S7)",
+      "frr": "not compared",
+      "match": null
+    },
+    {
+      "case": "case 8",
+      "route": "A→E",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "B→E",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "C→E",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "D→E",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "E→A",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "E→B",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "E→C",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 8",
+      "route": "E→D",
+      "expected": "no route",
+      "frr": null,
+      "match": true
+    },
+    {
+      "case": "case 7",
+      "route": "S→T",
+      "expected": {
+        "cost": 3,
+        "nextHops": [
+          "A",
+          "B"
+        ]
+      },
+      "frr": {
+        "cost": 3,
+        "nextHops": [
+          "A",
+          "B"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 7",
+      "route": "A→T",
+      "expected": {
+        "cost": null,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "frr": {
+        "cost": 2,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 7",
+      "route": "B→T",
+      "expected": {
+        "cost": null,
+        "nextHops": [
+          "C",
+          "D"
+        ]
+      },
+      "frr": {
+        "cost": 2,
+        "nextHops": [
+          "C",
+          "D"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 7",
+      "route": "C→T",
+      "expected": {
+        "cost": null,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "frr": {
+        "cost": 1,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "match": true
+    },
+    {
+      "case": "case 7",
+      "route": "D→T",
+      "expected": {
+        "cost": null,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "frr": {
+        "cost": 1,
+        "nextHops": [
+          "T"
+        ]
+      },
+      "match": true
+    }
+  ]
+}

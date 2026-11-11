@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Backbone play screen mock</title>
+<!-- VISUAL MOCK with decorative motion (add ?static for a still). Nothing here is simulated. Numbers, paths and the coastline are placeholders
+     drawn by hand to agree with each other. No game code. -->
+<style>
+  :root {
+    --navy: #050a18; --navy-2: #0a1430; --land: #081229; --line: #1b2b5c;
+    --blue: #2d7bff; --cyan: #3fe0ff; --indigo: #5b5bd6; --ice: #eaf6ff; --muted: #8fa8d0;
+    --amber: #ffb020; --magenta: #ff2bd6;
+    --mono: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --u: clamp(11px, 1.55vh, 20px);            /* HUD type unit: scales up for a projector */
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: var(--navy); color: var(--ice); overflow: hidden; }
+  body { font: var(--u)/1.35 var(--sans); }
+
+  /* ---- map ---- */
+  .stage { position: fixed; inset: 0; perspective: 1500px; perspective-origin: 50% 35%; overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 40%, #0a1736 0%, var(--navy) 60%, #02050d 100%); }
+  .tilt { position: absolute; inset: -9% -6% -14% -6%; transform: rotateX(17deg); transform-origin: 50% 60%; }
+  .tilt svg { width: 100%; height: 100%; display: block; }
+  .vignette { position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(100% 100% at 50% 50%, transparent 55%, rgba(2,5,13,.75) 100%); }
+
+  /* ---- HUD ---- */
+  .hud { position: fixed; inset: 0; pointer-events: none; padding: calc(var(--u) * .9); }
+  .hud > * { pointer-events: auto; position: absolute; }
+  .panel { background: rgba(8, 16, 40, .72); border: 1px solid rgba(63, 224, 255, .22);
+    border-radius: calc(var(--u) * .7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(45, 123, 255, .12), inset 0 0 0 1px rgba(234, 246, 255, .03); }
+  .label { font: 600 calc(var(--u) * .68)/1 var(--mono); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  .num { font: 600 calc(var(--u) * 1.5)/1 var(--mono); color: var(--ice); font-variant-numeric: tabular-nums; }
+
+  .brand { top: calc(var(--u) * .9); left: calc(var(--u) * .9); padding: calc(var(--u) * .6) calc(var(--u) * .9); }
+  .brand b { font: 700 calc(var(--u) * 1.05)/1 var(--mono); letter-spacing: .32em; color: var(--ice);
+    text-shadow: 0 0 12px rgba(63, 224, 255, .7); display: block; }
+  .brand span { display: block; margin-top: calc(var(--u) * .4); }
+
+  .meter { top: calc(var(--u) * .9); left: 50%; transform: translateX(-50%); width: min(38vw, 46em);
+    padding: calc(var(--u) * .6) calc(var(--u) * .9); }
+  .meter .row { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; }
+  .meter .row b { font: 600 calc(var(--u) * .9)/1 var(--mono); color: var(--amber); }
+  .bar { margin-top: calc(var(--u) * .5); height: calc(var(--u) * .95); border-radius: 99px; overflow: hidden;
+    background: rgba(234, 246, 255, .07); border: 1px solid rgba(234, 246, 255, .16); position: relative; }
+  .bar i { position: absolute; inset: 0 auto 0 0; width: 37%; border-radius: 99px;
+    background: repeating-linear-gradient(115deg, var(--amber) 0 7px, #c47f00 7px 11px);
+    box-shadow: 0 0 14px rgba(255, 176, 32, .7); }
+  .bar em { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ice); left: 100%; opacity: .0; }
+
+  .stats { top: calc(var(--u) * .9); right: calc(var(--u) * .9); display: flex; align-items: stretch; gap: calc(var(--u) * .6); }
+  .stat { padding: calc(var(--u) * .6) calc(var(--u) * .9); text-align: right; }
+  .stat .num { display: block; margin-top: calc(var(--u) * .35); }
+  .btn { width: calc(var(--u) * 3.3); min-width: 44px; min-height: 44px; display: grid; place-items: center;
+    font: 700 calc(var(--u) * 1.2)/1 var(--mono); color: var(--ice); cursor: pointer; }
+  .btn svg { width: 45%; height: 45%; }
+
+  .tools { bottom: calc(var(--u) * .9); left: 50%; transform: translateX(-50%); display: flex; gap: calc(var(--u) * .5);
+    padding: calc(var(--u) * .5); align-items: stretch; }
+  .tool { min-width: calc(var(--u) * 7.2); min-height: 44px; padding: calc(var(--u) * .55) calc(var(--u) * .8);
+    border-radius: calc(var(--u) * .5); border: 1px solid rgba(234, 246, 255, .14); background: rgba(234, 246, 255, .03);
+    display: grid; grid-template-columns: auto 1fr; gap: 0 calc(var(--u) * .6); align-items: center; }
+  .tool kbd { grid-row: span 2; font: 700 calc(var(--u) * .75)/1 var(--mono); color: var(--muted);
+    border: 1px solid rgba(143, 168, 208, .5); border-radius: 4px; padding: .3em .45em; }
+  .tool b { font: 600 calc(var(--u) * .95)/1.1 var(--sans); }
+  .tool small { font: 500 calc(var(--u) * .72)/1.1 var(--mono); color: var(--muted); }
+  .tool.on { border-color: var(--cyan); background: rgba(63, 224, 255, .12); box-shadow: 0 0 18px rgba(63, 224, 255, .35); }
+  .tool.on kbd { color: var(--navy); background: var(--cyan); border-color: var(--cyan); }
+  .budget { padding: calc(var(--u) * .4) calc(var(--u) * 1); border-left: 1px solid rgba(234, 246, 255, .14);
+    display: grid; align-content: center; gap: calc(var(--u) * .3); }
+
+  .reward { bottom: calc(var(--u) * .9); right: calc(var(--u) * .9); padding: calc(var(--u) * .6) calc(var(--u) * .9);
+    display: flex; align-items: center; gap: calc(var(--u) * .7); }
+  .ring { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); border-radius: 50%;
+    background: conic-gradient(var(--cyan) 0 62%, rgba(234, 246, 255, .12) 62% 100%); display: grid; place-items: center; }
+  .ring::after { content: ""; width: 68%; height: 68%; border-radius: 50%; background: #0a1430; }
+
+  .status { bottom: calc(var(--u) * .9); left: calc(var(--u) * .9); padding: calc(var(--u) * .6) calc(var(--u) * .9);
+    max-width: 30vw; display: flex; gap: calc(var(--u) * .6); align-items: center; border-color: rgba(255, 43, 214, .55); }
+  .status svg { flex: none; width: calc(var(--u) * 1.3); height: calc(var(--u) * 1.3); }
+  .status span { font: 500 calc(var(--u) * .85)/1.25 var(--mono); }
+
+  /* link options card (what a tap on a link opens) */
+  .card { top: 67.5%; left: 53.5%; width: calc(var(--u) * 17); padding: calc(var(--u) * .9); border-color: rgba(255, 176, 32, .6); }
+  .card h3 { font: 700 calc(var(--u) * 1.1)/1 var(--mono); letter-spacing: .08em; display: flex; justify-content: space-between; align-items: center; }
+  .chip { font: 700 calc(var(--u) * .68)/1 var(--mono); letter-spacing: .08em; color: var(--navy); background: var(--amber);
+    border-radius: 4px; padding: .35em .5em; display: inline-flex; gap: .35em; align-items: center; }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: calc(var(--u) * .55) 1em; margin-top: calc(var(--u) * .9); align-items: center; }
+  .kv dt { color: var(--muted); font: 500 calc(var(--u) * .82)/1.1 var(--sans); }
+  .kv dd { font: 600 calc(var(--u) * .95)/1 var(--mono); text-align: right; }
+  .step { display: inline-flex; align-items: center; gap: calc(var(--u) * .45); }
+  .step button, .act { font: 700 calc(var(--u) * .95)/1 var(--mono); color: var(--ice); background: rgba(234, 246, 255, .06);
+    border: 1px solid rgba(234, 246, 255, .25); border-radius: 6px; min-width: 44px; min-height: 44px; }
+  .step output { min-width: 2.4em; text-align: center; font: 700 calc(var(--u) * 1.25)/1 var(--mono); }
+  .acts { display: flex; gap: calc(var(--u) * .5); margin-top: calc(var(--u) * .9); }
+  .act { flex: 1; padding: 0 .6em; font-size: calc(var(--u) * .8); }
+  .act.primary { background: rgba(63, 224, 255, .16); border-color: var(--cyan); }
+
+  /* ---- phone landscape ---- */
+  @media (max-height: 520px) {
+    :root { --u: 11px; }
+    .tilt { inset: -6% -4% -12% -4%; }
+    .brand span, .stat .label { display: none; }
+    .brand { padding: 8px 10px; }
+    .stat { padding: 6px 9px; display: grid; align-content: center; }
+    .stat .num { margin: 0; font-size: 15px; }
+    .meter { width: 34vw; padding: 6px 10px; }
+    .tools { left: calc(var(--u) * .9); top: 56px; bottom: auto; transform: none; flex-direction: column; }
+    .tool { min-width: 0; width: 94px; }
+    .tool small { display: none; }
+    .budget { border-left: 0; border-top: 1px solid rgba(234, 246, 255, .14); padding: 6px 4px 2px; }
+    .budget .num { font-size: 13px; }
+    .status { left: 50%; transform: translateX(-50%); max-width: 46vw; padding: 6px 10px; }
+    .reward { padding: 6px 10px; }
+    .reward .num { font-size: 14px; }
+    .tilt { inset: 3% 0 4% 9%; }
+    .tilt svg { overflow: visible; }
+    .status { top: 52px; bottom: auto; }
+    .reward .label, .reward br { display: none; }
+    .card { top: auto; bottom: calc(var(--u) * .9); left: calc(var(--u) * .9); right: 92px; width: auto; padding: 6px 10px;
+      display: flex; align-items: center; gap: 14px; }
+    .card h3 { flex-direction: column; align-items: flex-start; gap: 5px; font-size: 13px; }
+    .kv { margin: 0; flex: 1; grid-template-columns: none; grid-template-rows: auto auto; grid-auto-flow: column; gap: 3px 14px; justify-items: start; }
+    .kv dd { text-align: left; }
+    .kv dt:nth-of-type(1), .kv dd:nth-of-type(1) { grid-row: span 1; }
+    .step button { min-width: 40px; min-height: 40px; }
+    .acts { margin: 0; gap: 8px; }
+    .act { min-height: 44px; padding: 0 12px; white-space: nowrap; }
+  }
+</style>
+</head>
+<body>
+<div class="stage"><div class="tilt">
+  <svg id="map" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img"
+       aria-label="Mock of the network map: twelve sites, sixteen links, one congested link, one cut link, one new site">
+    <defs>
+      <filter id="bloom" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b1"/>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b2"/>
+        <feMerge><feMergeNode in="b1"/><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2"/></filter>
+      <linearGradient id="sweep" gradientUnits="userSpaceOnUse" x1="520" y1="0" x2="860" y2="0">
+        <stop offset="0" stop-color="#3fe0ff" stop-opacity="0"/>
+        <stop offset=".92" stop-color="#3fe0ff" stop-opacity=".11"/>
+        <stop offset="1" stop-color="#eaf6ff" stop-opacity=".3"/>
+      </linearGradient>
+      <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+        <path d="M50 0H0V50" fill="none" stroke="#5b5bd6" stroke-opacity=".16" stroke-width="1"/>
+      </pattern>
+      <pattern id="gridBig" width="250" height="250" patternUnits="userSpaceOnUse">
+        <path d="M250 0H0V250" fill="none" stroke="#5b5bd6" stroke-opacity=".28" stroke-width="1.2"/>
+      </pattern>
+    </defs>
+    <rect x="-400" y="-300" width="2400" height="1500" fill="url(#grid)"/>
+    <rect x="-400" y="-300" width="2400" height="1500" fill="url(#gridBig)"/>
+    <g id="geo"></g>
+    <rect id="sweepBand" x="520" y="-300" width="340" height="1500" fill="url(#sweep)" transform="skewX(-12)"/>
+    <g id="fx"></g>
+    <g id="links" filter="url(#bloom)"></g>
+    <g id="pulses" filter="url(#bloom)"></g>
+    <g id="sites" filter="url(#bloom)"></g>
+    <g id="labels"></g>
+  </svg>
+</div></div>
+<div class="vignette"></div>
+
+<div class="hud">
+  <div class="panel brand"><b>BACKBONE</b><span class="label">Endless · seed 4F2A-91</span></div>
+
+  <div class="panel meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="37" aria-label="Drop meter">
+    <div class="row"><span class="label">Drop meter</span><b>▲ 37 / 100 dropped</b></div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div class="stats">
+    <div class="panel stat"><span class="label">Delivered</span><span class="num">1,840</span></div>
+    <div class="panel stat"><span class="label">Time</span><span class="num">04:12</span></div>
+    <button class="panel btn" aria-label="Pause (space)"><svg viewBox="0 0 10 10"><rect x="1.5" y="1" width="2.5" height="8" fill="#eaf6ff"/><rect x="6" y="1" width="2.5" height="8" fill="#eaf6ff"/></svg></button>
+    <button class="panel btn" aria-label="Mute"><svg viewBox="0 0 10 10"><path d="M1 3.6h2l2.6-2.2v7.2L3 6.4H1z" fill="#eaf6ff"/><path d="M7 3.2q1.6 1.8 0 3.6" stroke="#eaf6ff" fill="none" stroke-width=".9" stroke-linecap="round"/></svg></button>
+  </div>
+
+  <div class="panel tools" role="toolbar" aria-label="Tools">
+    <div class="tool on"><kbd>1</kbd><b>Link</b><small>drag site to site</small></div>
+    <div class="tool"><kbd>2</kbd><b>Cost</b><small>tap a link</small></div>
+    <div class="tool"><kbd>3</kbd><b>Upgrade</b><small>2 available</small></div>
+    <div class="budget"><span class="label">Fiber</span><span class="num">1,240 km</span></div>
+  </div>
+
+  <div class="panel status" role="status">
+    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.2" fill="none" stroke="#ff2bd6" stroke-width="1.3"/><path d="M3.6 3.6l4.8 4.8M8.4 3.6L3.6 8.4" stroke="#ff2bd6" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span>ATL–NYC fiber cut. Traffic rerouted via CHI.</span>
+  </div>
+
+  <div class="panel reward"><div class="ring"></div><div><span class="label">Next reward</span><br><span class="num">0:23</span></div></div>
+
+  <div class="panel card" role="dialog" aria-label="Link DEN to CHI">
+    <h3>DEN–CHI <span class="chip">▲ CONGESTED</span></h3>
+    <dl class="kv">
+      <dt>Cost</dt><dd><span class="step"><button aria-label="Lower cost">−</button><output>10</output><button aria-label="Raise cost">+</button></span></dd>
+      <dt>Capacity</dt><dd>4 pkt/s</dd>
+      <dt>Utilization</dt><dd style="color:var(--amber)">▲ 94%</dd>
+      <dt>Dropped here</dt><dd>12</dd>
+    </dl>
+    <div class="acts"><button class="act primary">Upgrade → 8 pkt/s</button><button class="act">Remove</button></div>
+  </div>
+</div>
+
+<script>
+// Static scene description. Hand-written placeholders, not simulation output.
+const NS = "http://www.w3.org/2000/svg";
+const PHONE = innerHeight < 520, K = PHONE ? 1.75 : 1, KW = PHONE ? 1.45 : 1;
+if (PHONE) document.getElementById("map").setAttribute("preserveAspectRatio", "xMidYMid meet");
+const P = (lon, lat) => [(lon + 128) / 62 * 1400 + 100, (50 - lat) / 26 * 560 + 190];
+const el = (parent, tag, attrs = {}, text) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+};
+const g = id => document.getElementById(id);
+const PULSES = [];
+const path = pts => "M" + pts.map(([lo, la]) => P(lo, la).map(n => n.toFixed(1)).join(" ")).join("L");
+
+// --- placeholder coastline (the build will use Natural Earth data) ---
+const land = [[-134,54],[-126.5,50.5],[-124.7,48.4],[-124,46],[-124.4,43],[-124.2,40.4],[-122.5,37.5],[-120.6,34.5],[-118.4,33.8],
+  [-117.1,32.5],[-115.5,29.5],[-112.5,25],[-110,23],[-110.5,24.5],[-112.8,28],[-114.7,31.6],[-112.5,29.5],[-110.5,27],[-108,25],
+  [-106,22.5],[-105,19],[-97,18],[-97.8,22.5],[-97.2,26],[-97,28],[-94.7,29.5],[-91,29.2],[-89.5,29.2],[-89,30.2],[-86,30.3],
+  [-84,30],[-82.8,28],[-81.8,26],[-81,25.1],[-80.2,25.3],[-80,27],[-81.3,30],[-81,32],[-79,33.5],[-76.5,34.7],[-75.5,35.3],
+  [-76,37],[-75,38.5],[-74,39.7],[-74,40.6],[-72,41],[-70,41.7],[-70.7,43],[-69,44],[-67,44.8],[-64.5,45.5],[-61,46],[-58,52],[-60,58],[-134,58]];
+const lakes = [
+  [[-92,46.7],[-89,47.9],[-86,47.6],[-84.6,46.6],[-87,46.5],[-90,46.6]],
+  [[-87.8,42],[-88,44.5],[-86.5,45.8],[-85,45.6],[-86.2,43.5],[-86.8,41.8]],
+  [[-84.5,45.9],[-82,45.8],[-80.2,44.6],[-81.7,43.2],[-82.5,43.1],[-83.5,44.5]],
+  [[-83.4,41.6],[-81,42.4],[-79,42.8],[-79.2,42.5],[-81.5,41.5]],
+  [[-79.7,43.3],[-77,43.9],[-76.3,43.6],[-78,43.3]]];
+el(g("geo"), "path", { d: path(land) + "Z", fill: "#0a1634", "fill-opacity": ".75" });
+el(g("geo"), "path", { d: path(land) + "Z", fill: "none", stroke: "#2d7bff", "stroke-opacity": ".35", "stroke-width": 6, filter: "url(#soft)" });
+el(g("geo"), "path", { d: path(land) + "Z", fill: "none", stroke: "#6f8fe8", "stroke-opacity": ".7", "stroke-width": 1.3, "stroke-linejoin": "round" });
+for (const l of lakes) el(g("geo"), "path", { d: path(l) + "Z", fill: "#050a18", stroke: "#6f8fe8", "stroke-opacity": ".55", "stroke-width": 1, "stroke-linejoin": "round" });
+
+// --- sites ---
+const S = {
+  SEA: [-122.3, 47.6, -16, -20], SFO: [-122.4, 37.8, -62, 6], LAX: [-118.2, 34.0, -58, 22], DEN: [-105.0, 39.7, -18, -22],
+  DFW: [-97.0, 32.8, -20, 36], MSP: [-93.3, 45.0, -18, -20], CHI: [-87.6, 41.9, 14, 30], ATL: [-84.4, 33.7, -72, -12],
+  MIA: [-80.2, 25.8, 18, 8], YYZ: [-79.4, 43.7, -14, -20], NYC: [-74.0, 40.7, 18, 6], PHX: [-112.0, 33.4, -18, 40],
+};
+const pos = Object.fromEntries(Object.entries(S).map(([k, v]) => [k, P(v[0], v[1])]));
+
+// --- links: [a, b, cost, tier, utilization 0..1, state] ---
+const L = [
+  ["SEA","SFO",10,1,.40], ["SFO","LAX",10,1,.55], ["SEA","DEN",10,1,.62], ["SFO","DEN",10,1,.35], ["LAX","DFW",10,1,.48],
+  ["DEN","CHI",10,1,.94,"hot"], ["DEN","DFW",10,1,.71], ["DFW","ATL",10,1,.66], ["CHI","NYC",5,2,.58], ["CHI","ATL",20,1,.74],
+  ["ATL","NYC",10,1,0,"cut"], ["ATL","MIA",10,1,.30], ["CHI","YYZ",10,1,.25], ["YYZ","NYC",10,1,.22], ["MSP","CHI",10,1,.44],
+  ["SEA","MSP",15,1,.18],
+];
+const mix = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+const loadColor = u => {
+  const indigo = [91, 91, 214], blue = [45, 123, 255], cyan = [63, 224, 255], ice = [200, 244, 255];
+  const c = u < .45 ? mix(indigo, blue, u / .45) : u < .8 ? mix(blue, cyan, (u - .45) / .35) : mix(cyan, ice, (u - .8) / .2);
+  return `rgb(${c})`;
+};
+const badge = (x, y, kind) => {
+  const b = el(g("labels"), "g", { transform: `translate(${x} ${y}) scale(${K})` });
+  if (kind === "hot") {
+    el(b, "path", { d: "M0 -13L13 10H-13Z", fill: "#ffb020", stroke: "#050a18", "stroke-width": 2, "stroke-linejoin": "round" });
+    el(b, "path", { d: "M0 -5V3M0 6.5V7", stroke: "#050a18", "stroke-width": 2.6, "stroke-linecap": "round" });
+  } else {
+    el(b, "circle", { r: 12, fill: "#050a18", stroke: "#ff2bd6", "stroke-width": 2.4 });
+    el(b, "path", { d: "M-5 -5L5 5M5 -5L-5 5", stroke: "#ff2bd6", "stroke-width": 2.8, "stroke-linecap": "round" });
+  }
+};
+const costPill = (x, y, text, color) => {
+  const w = (12 + text.length * 8.4) * K, h = 20 * K;
+  el(g("labels"), "rect", { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: 6, fill: "#050a18", "fill-opacity": ".88", stroke: color, "stroke-opacity": ".75" });
+  el(g("labels"), "text", { x, y: y + 4.5 * K, "text-anchor": "middle", fill: "#eaf6ff", "font-family": "Menlo, Consolas, monospace", "font-size": 13 * K, "font-weight": 600 }, text);
+};
+
+for (const [a, b, cost, tier, u, state] of L) {
+  const [x1, y1] = pos[a], [x2, y2] = pos[b];
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
+  const at = t => [x1 + dx * t, y1 + dy * t];
+  const [mx, my] = at(.5);
+  const w = ((tier === 2 ? 3 : 1.6) + u * 6.5) * KW;
+
+  if (state === "cut") {
+    // snapped fiber: two frayed halves, a gap, a spark, and the ripple spreading from the break
+    const [ax, ay] = at(.455), [bx, by] = at(.545);
+    for (const r of [70, 135, 210]) el(g("fx"), "circle", { class: "rip", cx: mx, cy: my, r, fill: "none",
+      stroke: r < 100 ? "#ff2bd6" : "#3fe0ff", "stroke-opacity": r < 100 ? .5 : r < 150 ? .28 : .14, "stroke-width": r < 100 ? 2.5 : 1.6 });
+    el(g("links"), "path", { d: `M${x1} ${y1}L${ax} ${ay}`, stroke: "#ff2bd6", "stroke-width": 2.6, "stroke-dasharray": "14 7", "stroke-opacity": .9 });
+    el(g("links"), "path", { d: `M${bx} ${by}L${x2} ${y2}`, stroke: "#ff2bd6", "stroke-width": 2.6, "stroke-dasharray": "14 7", "stroke-opacity": .9 });
+    for (let i = 0; i < 9; i++) { const an = i * .7 + .3, r1 = 5 + (i % 3) * 2, r2 = 16 + (i * 7 % 13);
+      el(g("pulses"), "path", { d: `M${mx + Math.cos(an) * r1} ${my + Math.sin(an) * r1}L${mx + Math.cos(an) * r2} ${my + Math.sin(an) * r2}`,
+        stroke: i % 2 ? "#ffd0f6" : "#ff2bd6", "stroke-width": 2, "stroke-linecap": "round" }); }
+    badge(mx + nx * 30, my + ny * 30, "cut");
+    costPill(mx - nx * 28, my - ny * 28, "CUT 0:27", "#ff2bd6");
+    continue;
+  }
+
+  const color = state === "hot" ? "#ffb020" : loadColor(u);
+  el(g("links"), "path", { d: `M${x1} ${y1}L${x2} ${y2}`, stroke: color, "stroke-width": w, "stroke-linecap": "round", "stroke-opacity": .5 + u * .5 });
+  if (tier === 2) for (const s of [-1, 1]) el(g("labels"), "path", { d: `M${x1 + nx * s * (w / 2 + 3)} ${y1 + ny * s * (w / 2 + 3)}L${x2 + nx * s * (w / 2 + 3)} ${y2 + ny * s * (w / 2 + 3)}`, stroke: "#eaf6ff", "stroke-opacity": .5, "stroke-width": 1 });
+  if (state === "hot") {
+    // second cue for congestion: hatch pattern along the link
+    el(g("labels"), "path", { d: `M${x1} ${y1}L${x2} ${y2}`, stroke: "#050a18", "stroke-width": w * .62, "stroke-dasharray": "5 11", "stroke-opacity": .85 });
+    badge(mx + nx * 26 * K, my + ny * 26 * K, "hot");
+  }
+
+  // pulses with trails, both directions
+  const n = Math.max(1, Math.round(u * len / 46));
+  for (const dir of [1, -1]) for (let i = 0; i < n; i++) {
+    const t0 = ((i + (dir > 0 ? .3 : .78) + (a.charCodeAt(0) % 5) * .07) / n) % 1, off = dir * (w / 2 + 2.5);
+    for (let k = 0; k < 6; k++) PULSES.push({ t0, dir, k, len, x1, y1, dx, dy, ox: nx * off, oy: ny * off,
+      c: el(g("pulses"), "circle", { r: Math.max(.8, 3.1 - k * .45) * KW,
+        fill: k === 0 ? "#ffffff" : state === "hot" ? "#ffe2a6" : "#9fefff", "fill-opacity": k === 0 ? 1 : .75 - k * .13 }) });
+  }
+  costPill(mx - nx * (state === "hot" ? 24 : 16) * K, my - ny * (state === "hot" ? 24 : 16) * K, String(cost), state === "hot" ? "#ffb020" : "#3fe0ff");
+}
+
+// --- sites ---
+for (const [code, [, , lx, ly]] of Object.entries(S)) {
+  const [x, y] = pos[code], isNew = code === "PHX";
+  if (isNew) {
+    for (const r of [22, 38, 58]) el(g("fx"), "circle", { class: "ping", cx: x, cy: y, r, fill: "none", stroke: "#3fe0ff", "stroke-opacity": .5 - r / 150, "stroke-width": 1.5 });
+    el(g("sites"), "circle", { cx: x, cy: y, r: 10, fill: "#050a18", stroke: "#eaf6ff", "stroke-width": 2, "stroke-dasharray": "4 4" });
+    el(g("labels"), "rect", { x: x + 16, y: y - 12 - 18 * K, width: 44 * K, height: 18 * K, rx: 5, fill: "#3fe0ff" });
+    el(g("labels"), "text", { x: x + 16 + 22 * K, y: y - 12 - 5 * K, "text-anchor": "middle", fill: "#050a18", "font-family": "Menlo, Consolas, monospace", "font-size": 12 * K, "font-weight": 700 }, "NEW");
+  } else {
+    el(g("sites"), "circle", { cx: x, cy: y, r: 13 * KW, fill: "#050a18", stroke: "#3fe0ff", "stroke-width": 3 * KW });
+    el(g("sites"), "circle", { cx: x, cy: y, r: 5.5 * KW, fill: "#eaf6ff" });
+  }
+  el(g("labels"), "text", { x: x + lx * (PHONE ? 1.5 : 1), y: y + ly * (PHONE ? 1.5 : 1), fill: "#eaf6ff", "font-family": "Menlo, Consolas, monospace", "font-size": 19 * K, "font-weight": 700,
+    "letter-spacing": 2, stroke: "#050a18", "stroke-width": 5, "paint-order": "stroke", "stroke-linejoin": "round" }, code);
+}
+
+// --- MOTION MOCK: decorative loops only. Pulses circulate on fixed links; nothing is routed or simulated. ---
+const STILL = location.search.includes("static") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rips = [...document.querySelectorAll(".rip")], pings = [...document.querySelectorAll(".ping")], band = g("sweepBand");
+function frame(ms) {
+  const s = ms / 1000;
+  for (const p of PULSES) {
+    let t = (p.t0 + p.dir * s * 62 / p.len) % 1; if (t < 0) t += 1;
+    t -= p.dir * p.k * 7 / p.len;
+    const show = t > .03 && t < .97;
+    p.c.setAttribute("visibility", show ? "visible" : "hidden");
+    if (show) { p.c.setAttribute("cx", p.x1 + p.dx * t + p.ox); p.c.setAttribute("cy", p.y1 + p.dy * t + p.oy); }
+  }
+  if (!STILL) {
+    rips.forEach((c, i) => { const ph = (s / 2.8 + i / 3) % 1;
+      c.setAttribute("r", 14 + ph * 230); c.setAttribute("stroke", ph < .3 ? "#ff2bd6" : "#3fe0ff"); c.setAttribute("stroke-opacity", (1 - ph) * .55); });
+    pings.forEach((c, i) => { const ph = (s / 2.2 + i / 3) % 1; c.setAttribute("r", 10 + ph * 56); c.setAttribute("stroke-opacity", (1 - ph) * .6); });
+    band.setAttribute("transform", `translate(${(s * 150) % 2600 - 1300} 0) skewX(-12)`);
+    requestAnimationFrame(frame);
+  }
+}
+frame(0); if (!STILL) requestAnimationFrame(frame);
+</script>
+</body>
+</html>
