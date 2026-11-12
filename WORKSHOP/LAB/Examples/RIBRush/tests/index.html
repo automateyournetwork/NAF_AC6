@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RIBRush browser checks</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, sans-serif;
+        background: #00001e;
+        color: #fff;
+      }
+
+      body {
+        max-width: 60rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      li[data-status="passed"] {
+        color: #00f3db;
+      }
+
+      li[data-status="failed"],
+      #summary[data-status="failed"] {
+        color: #ff0095;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>RIBRush browser checks</h1>
+      <p id="summary" role="status" aria-live="polite">Running checks…</p>
+      <ol id="results"></ol>
+    </main>
+    <script type="module">
+      import { tests } from "./fixtures.js";
+
+      const summary = document.querySelector("#summary");
+      const results = document.querySelector("#results");
+      let passed = 0;
+      let failed = 0;
+
+      if (tests.length === 0) {
+        summary.dataset.status = "failed";
+        summary.textContent = "0 tests discovered; test run failed.";
+      } else {
+        let context;
+        try {
+          const [routeResponse, levelResponse] = await Promise.all([
+            fetch("./route-cases.json"),
+            fetch("../data/levels.json"),
+          ]);
+          if (!routeResponse.ok || !levelResponse.ok) {
+            throw new Error(
+              `Could not load test data (${routeResponse.status}, ${levelResponse.status})`,
+            );
+          }
+          context = {
+            routeCases: await routeResponse.json(),
+            levels: await levelResponse.json(),
+          };
+        } catch (error) {
+          failed = 1;
+          const item = document.createElement("li");
+          item.dataset.status = "failed";
+          item.textContent = `FAIL test data: ${error.message}`;
+          results.append(item);
+        }
+
+        if (context) {
+          for (const test of tests) {
+            const item = document.createElement("li");
+            try {
+              await test.run(context);
+              passed += 1;
+              item.dataset.status = "passed";
+              item.textContent = `PASS ${test.name}`;
+            } catch (error) {
+              failed += 1;
+              item.dataset.status = "failed";
+              item.textContent = `FAIL ${test.name}: ${error.message}`;
+            }
+            results.append(item);
+          }
+        }
+
+        const status = failed === 0 ? "passed" : "failed";
+        summary.dataset.status = status;
+        summary.textContent = `${tests.length} discovered, ${passed} passed, ${failed} failed.`;
+      }
+    </script>
+  </body>
+</html>

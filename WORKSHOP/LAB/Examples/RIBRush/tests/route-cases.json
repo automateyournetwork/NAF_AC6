@@ -1,0 +1,519 @@
+{
+  "addressCases": [
+    {
+      "name": "IPv4 address",
+      "input": "192.0.2.42",
+      "family": "ipv4",
+      "formatted": "192.0.2.42"
+    },
+    {
+      "name": "compressed IPv6 address",
+      "input": "2001:0db8:0:1::42",
+      "family": "ipv6",
+      "formatted": "2001:db8:0:1::42"
+    },
+    {
+      "name": "IPv4-embedded IPv6 address",
+      "input": "::ffff:192.0.2.1",
+      "family": "ipv6",
+      "formatted": "::ffff:c000:201"
+    }
+  ],
+  "invalidAddresses": [
+    "256.0.0.1",
+    "01.2.3.4",
+    "192.0.2",
+    "2001:::1",
+    "2001:db8::1::1",
+    "1:2:3:4:5:6:7:8:9",
+    "2001:db8::1%eth0"
+  ],
+  "prefixCases": [
+    {
+      "name": "IPv4 /0",
+      "networkAddress": "0.0.0.0",
+      "prefixLength": 0,
+      "family": "ipv4",
+      "canonical": "0.0.0.0",
+      "inside": "255.255.255.255",
+      "outside": null
+    },
+    {
+      "name": "IPv4 /32",
+      "networkAddress": "192.0.2.42",
+      "prefixLength": 32,
+      "family": "ipv4",
+      "canonical": "192.0.2.42",
+      "inside": "192.0.2.42",
+      "outside": "192.0.2.43"
+    },
+    {
+      "name": "IPv6 /0",
+      "networkAddress": "::",
+      "prefixLength": 0,
+      "family": "ipv6",
+      "canonical": "::",
+      "inside": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+      "outside": null
+    },
+    {
+      "name": "IPv6 /128",
+      "networkAddress": "2001:db8::42",
+      "prefixLength": 128,
+      "family": "ipv6",
+      "canonical": "2001:db8::42",
+      "inside": "2001:db8::42",
+      "outside": "2001:db8::43"
+    },
+    {
+      "name": "IPv6 family isolation",
+      "networkAddress": "2001:db8::",
+      "prefixLength": 32,
+      "family": "ipv6",
+      "canonical": "2001:db8::",
+      "inside": "2001:db8::1",
+      "outside": "192.0.2.1"
+    }
+  ],
+  "invalidPrefixes": [
+    {
+      "networkAddress": "192.0.2.42",
+      "prefixLength": 24
+    },
+    {
+      "networkAddress": "2001:db8::1",
+      "prefixLength": 64
+    },
+    {
+      "networkAddress": "192.0.2.0",
+      "prefixLength": 33
+    },
+    {
+      "networkAddress": "2001:db8::",
+      "prefixLength": 129
+    }
+  ],
+  "routeEvaluationCases": [
+    {
+      "name": "IPv4 longest prefix beats a lower-AD broad route",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "static-broad",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.0.0",
+          "prefixLength": 16,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "broad"
+        },
+        {
+          "id": "ospf-specific",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "specific"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "ospf-specific",
+        "ruleCode": "longest-prefix"
+      }
+    },
+    {
+      "name": "same-prefix AD chooses the lower Cisco value",
+      "destination": "203.0.113.42",
+      "routes": [
+        {
+          "id": "same-prefix-static",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "static"
+        },
+        {
+          "id": "same-prefix-ospf",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "ospf"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "same-prefix-static",
+        "ruleCode": "administrative-distance"
+      },
+      "expectedEvidence": {
+        "adComparison.winningDistance": 1,
+        "adComparison.candidateDistances": [1, 110]
+      }
+    },
+    {
+      "name": "more-specific OSPF beats trusted broad Static",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "trap-static",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.0.0",
+          "prefixLength": 16,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "static"
+        },
+        {
+          "id": "trap-ospf",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "ospf"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "trap-ospf",
+        "ruleCode": "longest-prefix"
+      },
+      "expectedEvidence": {
+        "longestPrefixLength": 24,
+        "winner.administrativeDistance": 110
+      }
+    },
+    {
+      "name": "same-protocol OSPF metric chooses the lower value",
+      "destination": "203.0.113.42",
+      "routes": [
+        {
+          "id": "ospf-metric-20",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 20,
+          "nextHopId": "metric-20"
+        },
+        {
+          "id": "ospf-metric-5",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 5,
+          "nextHopId": "metric-5"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "ospf-metric-5",
+        "ruleCode": "metric"
+      },
+      "expectedEvidence": {
+        "metricComparison.winningMetric": 5,
+        "metricComparison.candidateMetrics": [20, 5]
+      }
+    },
+    {
+      "name": "different protocol metrics are not compared",
+      "destination": "198.51.100.42",
+      "routes": [
+        {
+          "id": "ebgp-metric-100",
+          "addressFamily": "ipv4",
+          "networkAddress": "198.51.100.0",
+          "prefixLength": 24,
+          "protocol": "ebgp",
+          "administrativeDistance": 20,
+          "metric": 100,
+          "nextHopId": "ebgp"
+        },
+        {
+          "id": "ibgp-metric-1",
+          "addressFamily": "ipv4",
+          "networkAddress": "198.51.100.0",
+          "prefixLength": 24,
+          "protocol": "ibgp",
+          "administrativeDistance": 200,
+          "metric": 1,
+          "nextHopId": "ibgp"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "ebgp-metric-100",
+        "ruleCode": "administrative-distance"
+      }
+    },
+    {
+      "name": "IPv6 maximum address metric boundary",
+      "destination": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+      "routes": [
+        {
+          "id": "ipv6-metric-max",
+          "addressFamily": "ipv6",
+          "networkAddress": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+          "prefixLength": 128,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 4294967295,
+          "nextHopId": "ipv6-max"
+        },
+        {
+          "id": "ipv6-metric-zero",
+          "addressFamily": "ipv6",
+          "networkAddress": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+          "prefixLength": 128,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 0,
+          "nextHopId": "ipv6-zero"
+        }
+      ],
+      "expected": {
+        "status": "winner",
+        "winnerRouteId": "ipv6-metric-zero",
+        "ruleCode": "metric"
+      },
+      "expectedEvidence": {
+        "longestPrefixLength": 128,
+        "metricComparison.winningMetric": 0
+      }
+    },
+    {
+      "name": "equal same-protocol metrics remain ambiguous",
+      "destination": "203.0.113.42",
+      "routes": [
+        {
+          "id": "ospf-metric-tie-one",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 5,
+          "nextHopId": "metric-tie-one"
+        },
+        {
+          "id": "ospf-metric-tie-two",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": 5,
+          "nextHopId": "metric-tie-two"
+        }
+      ],
+      "expected": {
+        "status": "ambiguous",
+        "winnerRouteId": null,
+        "ruleCode": null
+      }
+    },
+    {
+      "name": "no matching route",
+      "destination": "198.51.100.7",
+      "routes": [
+        {
+          "id": "other-prefix",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "other"
+        }
+      ],
+      "expected": {
+        "status": "no-route",
+        "winnerRouteId": null,
+        "ruleCode": "no-route"
+      }
+    },
+    {
+      "name": "unresolved equal routes are ambiguous",
+      "destination": "203.0.113.7",
+      "routes": [
+        {
+          "id": "tie-one",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "next-one"
+        },
+        {
+          "id": "tie-two",
+          "addressFamily": "ipv4",
+          "networkAddress": "203.0.113.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "next-two"
+        }
+      ],
+      "expected": {
+        "status": "ambiguous",
+        "winnerRouteId": null,
+        "ruleCode": null
+      }
+    },
+    {
+      "name": "host bits make route content invalid",
+      "destination": "192.0.2.7",
+      "routes": [
+        {
+          "id": "invalid-route",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.1",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "invalid"
+        }
+      ],
+      "expected": {
+        "status": "invalid-scenario",
+        "winnerRouteId": null,
+        "ruleCode": "error"
+      }
+    },
+    {
+      "name": "IPv6 route cannot match an IPv4 destination",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "ipv6-only-route",
+          "addressFamily": "ipv6",
+          "networkAddress": "2001:db8::",
+          "prefixLength": 32,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": null,
+          "nextHopId": "ipv6"
+        }
+      ],
+      "expected": {
+        "status": "no-route",
+        "winnerRouteId": null,
+        "ruleCode": "no-route"
+      }
+    },
+    {
+      "name": "unsupported route source is rejected",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "excluded-eigrp",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "eigrp",
+          "administrativeDistance": 90,
+          "metric": null,
+          "nextHopId": "eigrp"
+        }
+      ],
+      "expected": {
+        "status": "invalid-scenario",
+        "winnerRouteId": null,
+        "ruleCode": "error"
+      }
+    },
+    {
+      "name": "non-default Cisco administrative distance is rejected",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "incorrect-static-ad",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 20,
+          "metric": null,
+          "nextHopId": "static"
+        }
+      ],
+      "expected": {
+        "status": "invalid-scenario",
+        "winnerRouteId": null,
+        "ruleCode": "error"
+      }
+    },
+    {
+      "name": "negative metric is rejected",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "negative-metric",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "ospf",
+          "administrativeDistance": 110,
+          "metric": -1,
+          "nextHopId": "bad-metric"
+        }
+      ],
+      "expected": {
+        "status": "invalid-scenario",
+        "winnerRouteId": null,
+        "ruleCode": "error"
+      }
+    },
+    {
+      "name": "duplicate route IDs are rejected",
+      "destination": "192.0.2.42",
+      "routes": [
+        {
+          "id": "duplicate",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "first"
+        },
+        {
+          "id": "duplicate",
+          "addressFamily": "ipv4",
+          "networkAddress": "192.0.2.0",
+          "prefixLength": 24,
+          "protocol": "static",
+          "administrativeDistance": 1,
+          "metric": null,
+          "nextHopId": "second"
+        }
+      ],
+      "expected": {
+        "status": "invalid-scenario",
+        "winnerRouteId": null,
+        "ruleCode": "error"
+      }
+    }
+  ]
+}

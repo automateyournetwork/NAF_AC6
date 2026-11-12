@@ -1,0 +1,1442 @@
+{
+  "levels": [
+    {
+      "id": "level-1",
+      "addressFamily": "ipv4",
+      "ruleFocus": "mixed",
+      "expectedRuleCodes": [
+        "longest-prefix",
+        "administrative-distance",
+        "longest-prefix",
+        "metric",
+        "longest-prefix"
+      ],
+      "briefingTitle": "Route selection basics",
+      "briefing": "These warmups introduce the selection order. First choose the longest matching prefix. For identical prefixes, lower Cisco IOS/IOS XE default AD wins; when prefix, AD, and protocol also match, lower metric wins. Later levels add nested routes and harder comparisons.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "10.23.45.254",
+        "routes": [
+          {
+            "networkAddress": "10.23.0.0",
+            "prefixLength": 16,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static next hop A"
+          },
+          {
+            "networkAddress": "10.23.45.0",
+            "prefixLength": 24,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static next hop B"
+          }
+        ],
+        "winnerIndex": 1,
+        "explanation": "Both routes match. The /24 prefix is more specific than the /16, so its next hop wins."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "10.23.45.",
+        "destinationPrefixLength": 24,
+        "minHost": 1,
+        "maxHost": 253,
+        "routes": [
+          {
+            "networkAddress": "10.23.0.0",
+            "prefixLength": 16,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static /16 next hop"
+          },
+          {
+            "networkAddress": "10.23.45.0",
+            "prefixLength": 24,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static /24 next hop"
+          }
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "10.44.18.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "10.44.0.0",
+                "prefixLength": 16,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 10.44.0.0/16"
+              },
+              {
+                "networkAddress": "10.44.18.0",
+                "prefixLength": 24,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 10.44.18.0/24"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "172.20.88.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "172.20.88.0",
+                "prefixLength": 21,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 172.20.88.0/21"
+              },
+              {
+                "networkAddress": "172.20.88.0",
+                "prefixLength": 21,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF 172.20.88.0/21"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "192.0.2.",
+            "minHost": 65,
+            "maxHost": 126,
+            "routes": [
+              {
+                "networkAddress": "192.0.2.0",
+                "prefixLength": 24,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 192.0.2.0/24"
+              },
+              {
+                "networkAddress": "192.0.2.64",
+                "prefixLength": 26,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 192.0.2.64/26"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "198.19.64.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "198.19.64.0",
+                "prefixLength": 18,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 20,
+                "nextHopLabel": "OSPF metric 20"
+              },
+              {
+                "networkAddress": "198.19.64.0",
+                "prefixLength": 18,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 5,
+                "nextHopLabel": "OSPF metric 5"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "203.0.113.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "203.0.112.0",
+                "prefixLength": 20,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 203.0.112.0/20"
+              },
+              {
+                "networkAddress": "203.0.113.0",
+                "prefixLength": 24,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static 203.0.113.0/24"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-2",
+      "addressFamily": "ipv4",
+      "ruleFocus": "longest-prefix",
+      "expectedRuleCodes": [
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix"
+      ],
+      "briefingTitle": "Nested IPv4 prefixes",
+      "briefing": "Build on longest-prefix match with three overlapping candidates. Identify the longest matching prefix, even when the broader route has a different source or a lower AD. Practice across several IPv4 ranges before moving to IPv6.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "10.64.32.42",
+        "routes": [
+          {
+            "networkAddress": "10.0.0.0",
+            "prefixLength": 8,
+            "protocol": "connected",
+            "administrativeDistance": 0,
+            "metric": null,
+            "nextHopLabel": "Connected 10.0.0.0/8"
+          },
+          {
+            "networkAddress": "10.64.0.0",
+            "prefixLength": 10,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": null,
+            "nextHopLabel": "OSPF 10.64.0.0/10"
+          },
+          {
+            "networkAddress": "10.64.32.0",
+            "prefixLength": 20,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static 10.64.32.0/20"
+          }
+        ],
+        "winnerIndex": 2,
+        "explanation": "All three routes match. The /20 route is most specific and wins, despite the broader Connected route having a lower AD."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "10.64.32.",
+        "destinationPrefixLength": 20,
+        "minHost": 1,
+        "maxHost": 253,
+        "scenarioPools": [
+          {
+            "destinationNetwork": "10.64.32.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "10.0.0.0",
+                "prefixLength": 8,
+                "protocol": "connected",
+                "administrativeDistance": 0,
+                "metric": null,
+                "nextHopLabel": "CONNECTED /8"
+              },
+              {
+                "networkAddress": "10.64.0.0",
+                "prefixLength": 10,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /10"
+              },
+              {
+                "networkAddress": "10.64.32.0",
+                "prefixLength": 20,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "STATIC /20"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "172.20.16.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "172.16.0.0",
+                "prefixLength": 12,
+                "protocol": "connected",
+                "administrativeDistance": 0,
+                "metric": null,
+                "nextHopLabel": "CONNECTED /12"
+              },
+              {
+                "networkAddress": "172.20.0.0",
+                "prefixLength": 16,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /16"
+              },
+              {
+                "networkAddress": "172.20.16.0",
+                "prefixLength": 20,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "STATIC /20"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "192.168.2.",
+            "minHost": 129,
+            "maxHost": 254,
+            "routes": [
+              {
+                "networkAddress": "192.168.0.0",
+                "prefixLength": 16,
+                "protocol": "connected",
+                "administrativeDistance": 0,
+                "metric": null,
+                "nextHopLabel": "CONNECTED /16"
+              },
+              {
+                "networkAddress": "192.168.2.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /24"
+              },
+              {
+                "networkAddress": "192.168.2.128",
+                "prefixLength": 25,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "STATIC /25"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "198.18.96.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "198.18.0.0",
+                "prefixLength": 15,
+                "protocol": "connected",
+                "administrativeDistance": 0,
+                "metric": null,
+                "nextHopLabel": "CONNECTED /15"
+              },
+              {
+                "networkAddress": "198.18.64.0",
+                "prefixLength": 18,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /18"
+              },
+              {
+                "networkAddress": "198.18.96.0",
+                "prefixLength": 19,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "STATIC /19"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "192.168.88.",
+            "minHost": 129,
+            "maxHost": 254,
+            "routes": [
+              {
+                "networkAddress": "192.168.80.0",
+                "prefixLength": 20,
+                "protocol": "connected",
+                "administrativeDistance": 0,
+                "metric": null,
+                "nextHopLabel": "CONNECTED /20"
+              },
+              {
+                "networkAddress": "192.168.88.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /24"
+              },
+              {
+                "networkAddress": "192.168.88.128",
+                "prefixLength": 25,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "STATIC /25"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-3",
+      "addressFamily": "ipv4",
+      "ruleFocus": "administrative-distance",
+      "expectedRuleCodes": [
+        "longest-prefix",
+        "administrative-distance",
+        "administrative-distance",
+        "administrative-distance",
+        "administrative-distance"
+      ],
+      "briefingTitle": "Administrative distance",
+      "briefing": "This level uses Cisco IOS/IOS XE default AD values. Lower numeric AD wins only when the candidates have the identical prefix. Longest prefix match comes first, so a more-specific OSPF route can beat a broader Static route.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "172.30.50.42",
+        "routes": [
+          {
+            "networkAddress": "172.30.50.0",
+            "prefixLength": 24,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static AD 1"
+          },
+          {
+            "networkAddress": "172.30.50.0",
+            "prefixLength": 24,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": null,
+            "nextHopLabel": "OSPF AD 110"
+          }
+        ],
+        "winnerIndex": 0,
+        "explanation": "Both routes have the same /24 prefix. Cisco's lower default AD wins, so Static (1) beats OSPF (110)."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "172.30.50.",
+        "destinationNetworksByPacket": [
+          "192.0.2.",
+          "203.0.113.",
+          "203.0.113.",
+          "203.0.113.",
+          "203.0.113."
+        ],
+        "destinationPrefixLength": 24,
+        "minHost": 1,
+        "maxHost": 253,
+        "routeSets": [
+          [
+            {
+              "networkAddress": "192.0.0.0",
+              "prefixLength": 16,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static /16 · AD 1"
+            },
+            {
+              "networkAddress": "192.0.2.0",
+              "prefixLength": 24,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF /24 · AD 110"
+            }
+          ],
+          [
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static · AD 1"
+            },
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF · AD 110"
+            }
+          ],
+          [
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF · AD 110"
+            },
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ebgp",
+              "administrativeDistance": 20,
+              "metric": null,
+              "nextHopLabel": "eBGP · AD 20"
+            }
+          ],
+          [
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static · AD 1"
+            },
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ibgp",
+              "administrativeDistance": 200,
+              "metric": null,
+              "nextHopLabel": "iBGP · AD 200"
+            }
+          ],
+          [
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ebgp",
+              "administrativeDistance": 20,
+              "metric": null,
+              "nextHopLabel": "eBGP · AD 20"
+            },
+            {
+              "networkAddress": "203.0.113.0",
+              "prefixLength": 24,
+              "protocol": "ibgp",
+              "administrativeDistance": 200,
+              "metric": null,
+              "nextHopLabel": "iBGP · AD 200"
+            }
+          ]
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "172.18.4.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "172.16.0.0",
+                "prefixLength": 12,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static /16 · AD 1"
+              },
+              {
+                "networkAddress": "172.18.4.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF /24 · AD 110"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "10.45.12.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "10.45.12.0",
+                "prefixLength": 24,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static · AD 1"
+              },
+              {
+                "networkAddress": "10.45.12.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF · AD 110"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "172.31.40.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "172.31.40.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF · AD 110"
+              },
+              {
+                "networkAddress": "172.31.40.0",
+                "prefixLength": 24,
+                "protocol": "ebgp",
+                "administrativeDistance": 20,
+                "metric": null,
+                "nextHopLabel": "eBGP · AD 20"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "192.168.51.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "192.168.51.0",
+                "prefixLength": 24,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static · AD 1"
+              },
+              {
+                "networkAddress": "192.168.51.0",
+                "prefixLength": 24,
+                "protocol": "ibgp",
+                "administrativeDistance": 200,
+                "metric": null,
+                "nextHopLabel": "iBGP · AD 200"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "198.18.200.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "198.18.200.0",
+                "prefixLength": 24,
+                "protocol": "ebgp",
+                "administrativeDistance": 20,
+                "metric": null,
+                "nextHopLabel": "eBGP · AD 20"
+              },
+              {
+                "networkAddress": "198.18.200.0",
+                "prefixLength": 24,
+                "protocol": "ibgp",
+                "administrativeDistance": 200,
+                "metric": null,
+                "nextHopLabel": "iBGP · AD 200"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-4",
+      "addressFamily": "ipv4",
+      "ruleFocus": "metric",
+      "expectedRuleCodes": [
+        "metric",
+        "metric",
+        "metric",
+        "metric",
+        "metric"
+      ],
+      "briefingTitle": "Metric within one protocol",
+      "briefing": "A metric is compared only after the prefix, AD, and protocol are the same. In these OSPF examples, the lower OSPF metric wins; do not compare metrics across different protocols.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "10.42.7.42",
+        "routes": [
+          {
+            "networkAddress": "10.42.7.0",
+            "prefixLength": 24,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 20,
+            "nextHopLabel": "OSPF metric 20"
+          },
+          {
+            "networkAddress": "10.42.7.0",
+            "prefixLength": 24,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 5,
+            "nextHopLabel": "OSPF metric 5"
+          }
+        ],
+        "winnerIndex": 1,
+        "explanation": "The routes have identical prefixes, AD, and protocol. OSPF metric 5 is lower than 20, so metric 5 wins."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "10.42.7.",
+        "destinationPrefixLength": 24,
+        "minHost": 1,
+        "maxHost": 253,
+        "routes": [
+          {
+            "networkAddress": "10.42.7.0",
+            "prefixLength": 24,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 20,
+            "nextHopLabel": "OSPF metric 20"
+          },
+          {
+            "networkAddress": "10.42.7.0",
+            "prefixLength": 24,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 5,
+            "nextHopLabel": "OSPF metric 5"
+          }
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "192.168.100.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "192.168.100.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 20,
+                "nextHopLabel": "OSPF metric 20"
+              },
+              {
+                "networkAddress": "192.168.100.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 5,
+                "nextHopLabel": "OSPF metric 5"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "10.77.4.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "10.77.4.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 23,
+                "nextHopLabel": "OSPF metric 23"
+              },
+              {
+                "networkAddress": "10.77.4.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 6,
+                "nextHopLabel": "OSPF metric 6"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "172.22.16.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "172.22.16.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 26,
+                "nextHopLabel": "OSPF metric 26"
+              },
+              {
+                "networkAddress": "172.22.16.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 7,
+                "nextHopLabel": "OSPF metric 7"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "192.168.113.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "192.168.113.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 29,
+                "nextHopLabel": "OSPF metric 29"
+              },
+              {
+                "networkAddress": "192.168.113.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 8,
+                "nextHopLabel": "OSPF metric 8"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "198.18.220.",
+            "minHost": 1,
+            "maxHost": 253,
+            "routes": [
+              {
+                "networkAddress": "198.18.220.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 32,
+                "nextHopLabel": "OSPF metric 32"
+              },
+              {
+                "networkAddress": "198.18.220.0",
+                "prefixLength": 24,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 9,
+                "nextHopLabel": "OSPF metric 9"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-5",
+      "addressFamily": "ipv6",
+      "ruleFocus": "longest-prefix",
+      "expectedRuleCodes": [
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix",
+        "longest-prefix"
+      ],
+      "briefingTitle": "IPv6 longest prefix match",
+      "briefing": "IPv6 uses longest prefix match too. Among the listed matching routes, choose the prefix with the greatest number of fixed bits; route source and AD do not override a more-specific match.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "2001:db8:1234::42",
+        "routes": [
+          {
+            "networkAddress": "2001:db8::",
+            "prefixLength": 32,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": null,
+            "nextHopLabel": "OSPF IPv6 /32"
+          },
+          {
+            "networkAddress": "2001:db8:1234::",
+            "prefixLength": 48,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static IPv6 /48"
+          }
+        ],
+        "winnerIndex": 1,
+        "explanation": "Both routes match. The /48 prefix is more specific than the /32, so the Static next hop wins regardless of its AD."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "2001:db8:1234::",
+        "destinationPrefixLength": 64,
+        "minHost": 1,
+        "maxHost": 65535,
+        "routes": [
+          {
+            "networkAddress": "2001:db8::",
+            "prefixLength": 32,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": null,
+            "nextHopLabel": "OSPF IPv6 /32"
+          },
+          {
+            "networkAddress": "2001:db8:1234::",
+            "prefixLength": 48,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static IPv6 /48"
+          }
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "2001:db8:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /32"
+              },
+              {
+                "networkAddress": "2001:db8:1::",
+                "prefixLength": 48,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 2001:db8:1::/48"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:2::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /32"
+              },
+              {
+                "networkAddress": "2001:db8:2::",
+                "prefixLength": 48,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 2001:db8:2::/48"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:3::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /32"
+              },
+              {
+                "networkAddress": "2001:db8:3::",
+                "prefixLength": 48,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 2001:db8:3::/48"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:4::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /32"
+              },
+              {
+                "networkAddress": "2001:db8:4::",
+                "prefixLength": 48,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 2001:db8:4::/48"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:5::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /32"
+              },
+              {
+                "networkAddress": "2001:db8:5::",
+                "prefixLength": 48,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 2001:db8:5::/48"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-6",
+      "addressFamily": "ipv6",
+      "ruleFocus": "administrative-distance",
+      "expectedRuleCodes": [
+        "longest-prefix",
+        "administrative-distance",
+        "administrative-distance",
+        "administrative-distance",
+        "administrative-distance"
+      ],
+      "briefingTitle": "IPv6 administrative distance",
+      "briefing": "Compare Cisco IOS/IOS XE default AD only for identical IPv6 prefixes. First choose the longest matching prefix; then, among identical prefixes, lower AD wins. AD cannot make a shorter prefix win.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "2001:db8:1234::42",
+        "routes": [
+          {
+            "networkAddress": "2001:db8:1234::",
+            "prefixLength": 48,
+            "protocol": "static",
+            "administrativeDistance": 1,
+            "metric": null,
+            "nextHopLabel": "Static IPv6 /48"
+          },
+          {
+            "networkAddress": "2001:db8:1234::",
+            "prefixLength": 48,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": null,
+            "nextHopLabel": "OSPF IPv6 /48"
+          }
+        ],
+        "winnerIndex": 0,
+        "explanation": "The prefixes are identical, so Cisco's lower default AD wins: Static (1) beats OSPF (110)."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "2001:db8:1234::",
+        "destinationPrefixLength": 64,
+        "minHost": 1,
+        "maxHost": 65535,
+        "routeSets": [
+          [
+            {
+              "networkAddress": "2001:db8::",
+              "prefixLength": 32,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static IPv6 /32 · AD 1"
+            },
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 48,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF IPv6 /48 · AD 110"
+            }
+          ],
+          [
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static IPv6 · AD 1"
+            },
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF IPv6 · AD 110"
+            }
+          ],
+          [
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static IPv6 · AD 1"
+            },
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "ebgp",
+              "administrativeDistance": 20,
+              "metric": null,
+              "nextHopLabel": "eBGP IPv6 · AD 20"
+            }
+          ],
+          [
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "ospf",
+              "administrativeDistance": 110,
+              "metric": null,
+              "nextHopLabel": "OSPF IPv6 · AD 110"
+            },
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "ibgp",
+              "administrativeDistance": 200,
+              "metric": null,
+              "nextHopLabel": "iBGP IPv6 · AD 200"
+            }
+          ],
+          [
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "static",
+              "administrativeDistance": 1,
+              "metric": null,
+              "nextHopLabel": "Static IPv6 · AD 1"
+            },
+            {
+              "networkAddress": "2001:db8:1234::",
+              "prefixLength": 64,
+              "protocol": "ibgp",
+              "administrativeDistance": 200,
+              "metric": null,
+              "nextHopLabel": "iBGP IPv6 · AD 200"
+            }
+          ]
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "2001:db8:1:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8::",
+                "prefixLength": 32,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 /32 · AD 1"
+              },
+              {
+                "networkAddress": "2001:db8:1:1::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 /64 · AD 110"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:2:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:2:1::",
+                "prefixLength": 64,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 · AD 1"
+              },
+              {
+                "networkAddress": "2001:db8:2:1::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 · AD 110"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:3:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:3:1::",
+                "prefixLength": 64,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 · AD 1"
+              },
+              {
+                "networkAddress": "2001:db8:3:1::",
+                "prefixLength": 64,
+                "protocol": "ebgp",
+                "administrativeDistance": 20,
+                "metric": null,
+                "nextHopLabel": "eBGP IPv6 · AD 20"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:4:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:4:1::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": null,
+                "nextHopLabel": "OSPF IPv6 · AD 110"
+              },
+              {
+                "networkAddress": "2001:db8:4:1::",
+                "prefixLength": 64,
+                "protocol": "ibgp",
+                "administrativeDistance": 200,
+                "metric": null,
+                "nextHopLabel": "iBGP IPv6 · AD 200"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:5:1::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:5:1::",
+                "prefixLength": 64,
+                "protocol": "static",
+                "administrativeDistance": 1,
+                "metric": null,
+                "nextHopLabel": "Static IPv6 · AD 1"
+              },
+              {
+                "networkAddress": "2001:db8:5:1::",
+                "prefixLength": 64,
+                "protocol": "ibgp",
+                "administrativeDistance": 200,
+                "metric": null,
+                "nextHopLabel": "iBGP IPv6 · AD 200"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "level-7",
+      "addressFamily": "ipv6",
+      "ruleFocus": "metric",
+      "expectedRuleCodes": [
+        "metric",
+        "metric",
+        "metric",
+        "metric",
+        "metric"
+      ],
+      "briefingTitle": "IPv6 metric within one protocol",
+      "briefing": "Apply the same ordered rule set to IPv6: longest prefix, then Cisco default AD when the prefix is identical, then metric only for the same protocol. The IPv6 OSPF candidates share a prefix and AD, so lower OSPF metric wins.",
+      "packetCount": 5,
+      "workedExample": {
+        "destination": "2001:db8:6::42",
+        "routes": [
+          {
+            "networkAddress": "2001:db8:6::",
+            "prefixLength": 64,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 30,
+            "nextHopLabel": "OSPF IPv6 metric 30"
+          },
+          {
+            "networkAddress": "2001:db8:6::",
+            "prefixLength": 64,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 8,
+            "nextHopLabel": "OSPF IPv6 metric 8"
+          }
+        ],
+        "winnerIndex": 1,
+        "explanation": "The IPv6 routes share the same /64, AD 110, and OSPF protocol. Metric 8 is lower than 30."
+      },
+      "generationConstraints": {
+        "destinationNetwork": "2001:db8:6::",
+        "destinationPrefixLength": 64,
+        "minHost": 1,
+        "maxHost": 65535,
+        "routes": [
+          {
+            "networkAddress": "2001:db8:6::",
+            "prefixLength": 64,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 30,
+            "nextHopLabel": "OSPF IPv6 metric 30"
+          },
+          {
+            "networkAddress": "2001:db8:6::",
+            "prefixLength": 64,
+            "protocol": "ospf",
+            "administrativeDistance": 110,
+            "metric": 8,
+            "nextHopLabel": "OSPF IPv6 metric 8"
+          }
+        ],
+        "scenarioPools": [
+          {
+            "destinationNetwork": "2001:db8:6::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:6::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 30,
+                "nextHopLabel": "OSPF IPv6 metric 30"
+              },
+              {
+                "networkAddress": "2001:db8:6::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 8,
+                "nextHopLabel": "OSPF IPv6 metric 8"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:7::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:7::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 34,
+                "nextHopLabel": "OSPF IPv6 metric 34"
+              },
+              {
+                "networkAddress": "2001:db8:7::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 9,
+                "nextHopLabel": "OSPF IPv6 metric 9"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:8::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:8::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 38,
+                "nextHopLabel": "OSPF IPv6 metric 38"
+              },
+              {
+                "networkAddress": "2001:db8:8::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 10,
+                "nextHopLabel": "OSPF IPv6 metric 10"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:9::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:9::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 42,
+                "nextHopLabel": "OSPF IPv6 metric 42"
+              },
+              {
+                "networkAddress": "2001:db8:9::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 11,
+                "nextHopLabel": "OSPF IPv6 metric 11"
+              }
+            ]
+          },
+          {
+            "destinationNetwork": "2001:db8:a::",
+            "minHost": 1,
+            "maxHost": 65535,
+            "routes": [
+              {
+                "networkAddress": "2001:db8:a::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 46,
+                "nextHopLabel": "OSPF IPv6 metric 46"
+              },
+              {
+                "networkAddress": "2001:db8:a::",
+                "prefixLength": 64,
+                "protocol": "ospf",
+                "administrativeDistance": 110,
+                "metric": 12,
+                "nextHopLabel": "OSPF IPv6 metric 12"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
