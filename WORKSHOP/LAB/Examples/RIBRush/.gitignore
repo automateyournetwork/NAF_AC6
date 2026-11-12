@@ -1,0 +1,22 @@
+# JavaScript dependencies and build output
+node_modules/
+dist/
+build/
+
+# Local configuration and logs
+.env*
+*.log
+
+# Python local server artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
